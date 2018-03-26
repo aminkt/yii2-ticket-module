@@ -1,0 +1,37 @@
+{
+  "name": "aminkt/yii2-ticket-module",
+  "description": "Customer ticketing service implemented as module for  yii2",
+  "keywords": ["yii", "ticket", "customer care", "ticketing"],
+  "type": "yii2-extension",
+  "support": {
+    "source": "https://gitlab.com/telco/yii2-ticket-module"
+  },
+  "authors": [
+    {
+      "name": "Amin Keshavarz",
+      "email": "ak_1596@yahoo.com"
+    },
+    {
+      "name": "Mohammad Parvane",
+      "email": "mohammad.pvn1375@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.0",
+    "yiisoft/yii2": "~2.0.11",
+    "aminkt/yii2-alert-widget": "dev-master",
+    "aminkt/yii2-uploadManager-module" : "@dev"
+  },
+  "autoload": {
+    "psr-4": {
+      "aminkt\\ticket\\": ""
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "master"
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
