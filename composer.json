@@ -20,7 +20,7 @@
     "php": ">=7.0",
     "yiisoft/yii2": "~2.0.11",
     "aminkt/yii2-alert-widget": "dev-master",
-    "aminkt/yii2-uploadManager-module" : "@dev"
+    "aminkt/yii2-upload-manager" : "dev-master"
   },
   "autoload": {
     "psr-4": {
