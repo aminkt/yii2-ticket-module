@@ -9,7 +9,7 @@ Documents
 Licence
 --------
 
-This module implemented by [Tellco teadm](http://tellco.ir) for customer care department but you can use this
+This module implemented by [Tellco team](http://tellco.ir) for customer care department but you can use this
 in your project but consider you can not remove anthers names.
 
 If you have any suggestion or you want contribute to this project you can create a fork of this repo and send
