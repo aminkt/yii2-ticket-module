@@ -1,6 +1,6 @@
 <?php
 
-namespace aminkt\ticket;
+namespace api\modules\ticket;
 
 /**
  * ticket module definition class
@@ -10,7 +10,7 @@ class Ticket extends \yii\base\Module
     /**
      * @inheritdoc
      */
-    public $controllerNamespace = 'aminkt\ticket\controllers\front';
+    public $controllerNamespace = 'api\modules\ticket\controllers';
 
     /**
      * @inheritdoc
@@ -32,5 +32,5 @@ class Ticket extends \yii\base\Module
 
         return \Yii::$app->getModule('ticket');
     }
-
 }
+

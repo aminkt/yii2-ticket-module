@@ -1,13 +1,8 @@
 <?php
 
-namespace aminkt\ticket\models;
+namespace api\modules\ticket\models;
 
-use aminkt\ticket\interfaces\CustomerCareInterface;
-use aminkt\ticket\interfaces\CustomerInterface;
 use Yii;
-use yii\behaviors\TimestampBehavior;
-use yii\db\ActiveRecord;
-use yii\db\Expression;
 
 /**
  * This is the model class for table "ticket_messages".
@@ -20,31 +15,10 @@ use yii\db\Expression;
  * @property string $updateAt
  * @property string $createAt
  *
- * @property \aminkt\ticket\interfaces\CustomerCareInterface|null $customerCareUser
- * @property \aminkt\ticket\interfaces\CustomerCareInterface|\aminkt\ticket\interfaces\CustomerInterface $user
- * @property Ticket $ticket
+ * @property Tickets $ticket
  */
-class TicketMessage extends ActiveRecord
+class TicketMessages extends \yii\db\ActiveRecord
 {
-    /**
-     * @inheritdoc
-     */
-    public function behaviors()
-    {
-        return [
-            [
-                'class' => TimestampBehavior::className(),
-                'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['createAt', 'updateAt'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updateAt'],
-                ],
-                // if you're using datetime instead of UNIX timestamp:
-                'value' => new Expression('NOW()'),
-            ],
-        ];
-    }
-
-
     /**
      * @inheritdoc
      */
@@ -64,7 +38,7 @@ class TicketMessage extends ActiveRecord
             [['attachments'], 'required'],
             [['updateAt', 'createAt'], 'safe'],
             [['attachments'], 'string', 'max' => 191],
-            [['ticketId'], 'exist', 'skipOnError' => true, 'targetClass' => Ticket::class, 'targetAttribute' => ['ticketId' => 'id']],
+            [['ticketId'], 'exist', 'skipOnError' => true, 'targetClass' => Tickets::className(), 'targetAttribute' => ['ticketId' => 'id']],
         ];
     }
 
@@ -89,12 +63,18 @@ class TicketMessage extends ActiveRecord
      */
     public function getTicket()
     {
-        return $this->hasOne(Ticket::className(), ['id' => 'ticketId']);
+        return $this->hasOne(Tickets::className(), ['id' => 'ticketId']);
     }
 
     /**
-     * Return ticket message
-     *
+     * @return array
+     */
+    public function getDirtyAttributes()
+    {
+        return $this->dirtyAttributes;
+    }
+
+    /**
      * @return string
      */
     public function getMessage()
@@ -103,11 +83,7 @@ class TicketMessage extends ActiveRecord
     }
 
     /**
-     * Return attachments models.
-     *
      * @return string
-     *
-     * todo : Change return type to upload manager files.
      */
     public function getAttachments()
     {
@@ -115,45 +91,13 @@ class TicketMessage extends ActiveRecord
     }
 
     /**
-     * Return customer care user model.
-     *
-     * @return CustomerCareInterface|CustomerInterface
-     *
-     * todo : should implement.
+     * @return int
      */
-    public function getUser()
+    public function getCustomerCareUSer()
     {
-        if($this->isCustomerCareReply()){
-            // todo : Should return customer care user model.
-            return null;
-        }else{
-            return $this->ticket->customer;
-        }
+
+        return  ;
     }
 
-    /**
-     * Return true of message send bys customer care users.
-     *
-     * @return bool
-     */
-    public function isCustomerCareReply() : bool {
-        return $this->customerCareId?true:false;
-    }
-
-    /**
-     * Send new message to current ticket.
-     *
-     * @param integer $id
-     * @param string $message
-     * @param string $attachments
-     * @param CustomerCareInterface|null $customerCare
-     *
-     * @throws \RuntimeException    When cant create ticket.
-     *
-     * @return TicketMessage
-     */
-    public static function sendNewMessage(int $id, string $message, string $attachments, CustomerCareInterface $customerCare=null) : self {
-        // todo : Should implement.
-    }
 
 }

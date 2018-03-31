@@ -1,6 +1,7 @@
 <?php
 
 namespace aminkt\ticket\controllers\admin;
+use aminkt\ticket\Ticket;
 
 /**
  * Class CustomerCareController
@@ -13,5 +14,8 @@ class CustomerCareController extends \yii\web\Controller
     {
         return $this->render('index');
     }
+
+
+    
 
 }
