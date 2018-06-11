@@ -22,7 +22,7 @@ use yii\db\Expression;
  *
  * @property \aminkt\ticket\interfaces\CustomerCareInterface|null $customerCareUser
  * @property \aminkt\ticket\interfaces\CustomerCareInterface|\aminkt\ticket\interfaces\CustomerInterface $user
- * @property Ticket $ticket
+ * @property Tickets $ticket
  */
 class TicketMessage extends ActiveRecord
 {
@@ -64,7 +64,7 @@ class TicketMessage extends ActiveRecord
             [['attachments'], 'required'],
             [['updateAt', 'createAt'], 'safe'],
             [['attachments'], 'string', 'max' => 191],
-            [['ticketId'], 'exist', 'skipOnError' => true, 'targetClass' => Ticket::class, 'targetAttribute' => ['ticketId' => 'id']],
+            [['ticketId'], 'exist', 'skipOnError' => true, 'targetClass' => Tickets::class, 'targetAttribute' => ['ticketId' => 'id']],
         ];
     }
 
@@ -89,7 +89,7 @@ class TicketMessage extends ActiveRecord
      */
     public function getTicket()
     {
-        return $this->hasOne(Ticket::className(), ['id' => 'ticketId']);
+        return $this->hasOne(Tickets::className(), ['id' => 'ticketId']);
     }
 
     /**
@@ -123,10 +123,10 @@ class TicketMessage extends ActiveRecord
      */
     public function getUser()
     {
-        if($this->isCustomerCareReply()){
+        if ($this->isCustomerCareReply()) {
             // todo : Should return customer care user model.
             return null;
-        }else{
+        } else {
             return $this->ticket->customer;
         }
     }
@@ -136,8 +136,9 @@ class TicketMessage extends ActiveRecord
      *
      * @return bool
      */
-    public function isCustomerCareReply() : bool {
-        return $this->customerCareId?true:false;
+    public function isCustomerCareReply(): bool
+    {
+        return $this->customerCareId ? true : false;
     }
 
     /**
@@ -152,8 +153,15 @@ class TicketMessage extends ActiveRecord
      *
      * @return TicketMessage
      */
-    public static function sendNewMessage(int $id, string $message, string $attachments, CustomerCareInterface $customerCare=null) : self {
-        // todo : Should implement.
+    public static function sendNewMessage(int $id, string $message, string $attachments, CustomerCareInterface $customerCare = null): self
+    {
+        $ticketMessage = new TicketMessage();
+        $ticketMessage->ticketId = $id;
+        $ticketMessage->message = $message;
+        $ticketMessage->attachments = $attachments;
+        if ($customerCare)
+            $ticketMessage->customerCareId = $customerCare->getId();
+        return $ticketMessage;
     }
 
 }
