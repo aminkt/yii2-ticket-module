@@ -71,7 +71,7 @@ class Ticket extends ActiveRecord
     {
         return [
             [['name', 'mobile', 'email', 'subject'], 'required'],
-            [['customerId', 'categoryId', 'status'], 'integer'],
+            [['customerId', 'categoryId', 'status', 'departmentId'], 'integer'],
             [['updateAt', 'createAt'], 'safe'],
             [['name', 'email', 'subject'], 'string', 'max' => 191],
             [['mobile'], 'string', 'max' => 15],

@@ -10,7 +10,7 @@ class Ticket extends \yii\base\Module
     /**
      * @inheritdoc
      */
-    public $controllerNamespace = 'aminkt\ticket\controllers\front';
+    public $controllerNamespace = 'aminkt\ticket\controllers';
 
     /**
      * @inheritdoc
