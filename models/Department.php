@@ -6,7 +6,7 @@ use Yii;
 use yii\db\ActiveRecord;
 
 /**
- * This is the model class for table "{{%departments}}".
+ * This is the model class for table "{{%ticket_departments}}".
  *
  * @property int $id
  * @property string $name
