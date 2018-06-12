@@ -1,8 +1,10 @@
 <?php
 
 namespace aminkt\ticket\models;
+
 use aminkt\ticket\interfaces\CustomerCareInterface;
 use aminkt\ticket\interfaces\CustomerInterface;
+use aminkt\widgets\alert\Alert;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
@@ -23,7 +25,7 @@ use yii\db\Expression;
  * @property string $createAt
  *
  * @property TicketMessage[] $ticketMessages
- * @property TicketCategory $category
+ * @property TicketCategories $category
  * @property string $userName
  * @property string $userEmail
  * @property \aminkt\ticket\interfaces\CustomerInterface $customer
@@ -31,12 +33,13 @@ use yii\db\Expression;
  *
  * @package aminkt\ticket
  */
-class Ticket extends ActiveRecord
+class Tickets extends ActiveRecord
 {
     const STATUS_NOT_REPLIED = 1;
     const STATUS_REPLIED = 2;
     const STATUS_CLOSED = 3;
     const STATUS_BLOCKED = 4;
+
 
     /**
      * @inheritdoc
@@ -75,7 +78,7 @@ class Ticket extends ActiveRecord
             [['updateAt', 'createAt'], 'safe'],
             [['name', 'email', 'subject'], 'string', 'max' => 191],
             [['mobile'], 'string', 'max' => 15],
-            [['categoryId'], 'exist', 'skipOnError' => true, 'targetClass' => TicketCategory::class, 'targetAttribute' => ['categoryId' => 'id']],
+            [['categoryId'], 'exist', 'skipOnError' => true, 'targetClass' => TicketCategories::class, 'targetAttribute' => ['categoryId' => 'id']],
         ];
     }
 
@@ -85,16 +88,16 @@ class Ticket extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'name' => 'Name',
-            'customerId' => 'Customer ID',
-            'mobile' => 'Mobile',
-            'email' => 'Email',
-            'subject' => 'Subject',
-            'categoryId' => 'Category ID',
-            'status' => 'Status',
-            'updateAt' => 'Update At',
-            'createAt' => 'Create At',
+            'id' => 'شماره شناسه',
+            'name' => 'نام',
+            'customerId' => 'کاربر',
+            'mobile' => 'موبایل',
+            'email' => 'ایمیل',
+            'subject' => 'موضوع',
+            'categoryId' => 'دسته بندی',
+            'status' => 'موقعیت',
+            'updateAt' => 'تاریخ ویرایش',
+            'createAt' => 'تاریخ ایجاد',
         ];
     }
 
@@ -111,7 +114,7 @@ class Ticket extends ActiveRecord
      */
     public function getCategory()
     {
-        return $this->hasOne(TicketCategory::className(), ['id' => 'categoryId']);
+        return $this->hasOne(TicketCategories::className(), ['id' => 'categoryId']);
     }
 
     /**
@@ -119,7 +122,7 @@ class Ticket extends ActiveRecord
      *
      * @return string
      */
-    public function getSubject() : string
+    public function getSubject(): string
     {
         return $this->subject;
     }
@@ -129,7 +132,7 @@ class Ticket extends ActiveRecord
      *
      * @return string
      */
-    function getUserName() : string
+    function getUserName(): string
     {
         return $this->name;
     }
@@ -139,7 +142,7 @@ class Ticket extends ActiveRecord
      *
      * @return string
      */
-    function getUserMobile() : string
+    function getUserMobile(): string
     {
         return $this->mobile;
 
@@ -150,7 +153,7 @@ class Ticket extends ActiveRecord
      *
      * @return string
      */
-    function getUserEmail() : string
+    function getUserEmail(): string
     {
         return $this->email;
 
@@ -160,7 +163,8 @@ class Ticket extends ActiveRecord
      * Return true if customer model not available and false if available.
      * @return bool
      */
-    function isGuestTicket() : bool {
+    function isGuestTicket(): bool
+    {
         return $this->customerId ? false : true;
     }
 
@@ -169,14 +173,15 @@ class Ticket extends ActiveRecord
      *
      * @return CustomerInterface
      */
-    function getCustomer() : CustomerInterface {
-        if($this->isGuestTicket()){
+    function getCustomer(): CustomerInterface
+    {
+        if ($this->isGuestTicket()) {
             return new CustomerTempModel(
-              $this->getUserName(),
-              $this->getUserEmail(),
-              $this->getUserMobile()
+                $this->getUserName(),
+                $this->getUserEmail(),
+                $this->getUserMobile()
             );
-        }else{
+        } else {
             // todo should return user model.
             return null;
         }
@@ -188,16 +193,30 @@ class Ticket extends ActiveRecord
      * @param string $subject
      * @param string $message
      * @param CustomerInterface $customer
-     * @param TicketCategory $category
+     * @param TicketCategories $category
      *
      * @throws \RuntimeException    When cant create ticket.
      *
-     * @return Ticket
+     * @return Tickets
      */
-    public static function createNewTicket(string $subject, string $message, CustomerInterface $customer, TicketCategory $category) : self {
-        // todo : Should implement.
+    public static function createNewTicket(string $subject, CustomerInterface $customer, TicketCategories $category): self
+    {
+        $ticket = new Tickets();
+        $ticket->name = $customer->getName();
+        $ticket->mobile = $customer->getMobile();
+        $ticket->email = $customer->getEmail();
+        $ticket->customerId = $customer->getId();
+        $ticket->categoryId = $category->id;
+        $ticket->subject = $subject;
+        $ticket->status = 1;
+        if ($ticket->save()) {
+            Alert::success('تیکت با موفقیت ایجاد شد', 'اسم تیکت جدید : ' . $ticket->name);
+            return $ticket;
+        } else {
+            \Yii::error($ticket->getErrors());
+            throw new \RuntimeException('تیکت ذخیره نشد.');
+        }
     }
-
 
     /**
      * Send new message to current ticket.
@@ -210,7 +229,9 @@ class Ticket extends ActiveRecord
      *
      * @return TicketMessage
      */
-    public function sendNewMessage(string $message, string $attachments, CustomerCareInterface $customerCare=null) : TicketMessage{
+    public function sendNewMessage(string $message, string $attachments, CustomerCareInterface $customerCare = null): TicketMessage
+    {
+
         $message = TicketMessage::sendNewMessage($this->id, $message, $attachments, $customerCare);
         // todo : Should implement.
         return $message;
@@ -223,9 +244,10 @@ class Ticket extends ActiveRecord
      *
      * @throws \RuntimeException    When cant close current ticket.
      */
-    public function closeTicket(){
+    public function closeTicket()
+    {
         $this->status = self::STATUS_CLOSED;
-        if(!$this->save()){
+        if (!$this->save()) {
             \Yii::error($this->getErrors());
             throw new \RuntimeException("Cant close ticket.");
         }
@@ -239,9 +261,10 @@ class Ticket extends ActiveRecord
      *
      * @throws \RuntimeException    When cant open current ticket.
      */
-    public function openTicket(){
+    public function openTicket()
+    {
         $this->status = self::STATUS_NOT_REPLIED;
-        if(!$this->save()){
+        if (!$this->save()) {
             \Yii::error($this->getErrors());
             throw new \RuntimeException("Cant open ticket.");
         }
@@ -249,13 +272,14 @@ class Ticket extends ActiveRecord
     }
 }
 
-class CustomerTempModel implements CustomerInterface {
+class CustomerTempModel implements CustomerInterface
+{
     public $id = null;
     public $name;
     public $email;
     public $mobile;
 
-    function __construct(string $name, string $email=null, string $mobile=null)
+    function __construct(string $name, string $email = null, string $mobile = null)
     {
         $this->name = $name;
         $this->email = $email;

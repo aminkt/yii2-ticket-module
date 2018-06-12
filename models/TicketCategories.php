@@ -16,9 +16,9 @@ use yii\db\Expression;
  * @property string $updateAt
  * @property string $createAt
  *
- * @property Ticket[] $tickets
+ * @property Tickets[] $tickets
  */
-class TicketCategory extends ActiveRecord
+class TicketCategories extends ActiveRecord
 {
     const STATUS_ACTIVE=1;
     const STATUS_DE_ACTIVE=2;
