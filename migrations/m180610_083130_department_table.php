@@ -32,6 +32,7 @@ class m180610_083130_department_table extends Migration
             'userId' => $this->integer()->notNull(),
             'createAt' => $this->dateTime()
         ], $tableOptions);
+
         $this->addPrimaryKey(
             'ticket_user_departments_pk',
             '{{%ticket_user_departments}}',

@@ -17,6 +17,7 @@ use yii\db\Expression;
  * @property string $mobile
  * @property string $email
  * @property string $subject
+ * @property int $departmentId
  * @property int $categoryId
  * @property int $status
  * @property string $updateAt
@@ -91,6 +92,7 @@ class Ticket extends ActiveRecord
             'mobile' => 'Mobile',
             'email' => 'Email',
             'subject' => 'Subject',
+            'departmentId' => 'Department ID',
             'categoryId' => 'Category ID',
             'status' => 'Status',
             'updateAt' => 'Update At',
