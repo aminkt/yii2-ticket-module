@@ -63,7 +63,7 @@ class Ticket extends ActiveRecord
      */
     public static function tableName()
     {
-        return 'tickets';
+        return '{{%tickets}}';
     }
 
     /**
@@ -115,6 +115,14 @@ class Ticket extends ActiveRecord
     public function getCategory()
     {
         return $this->hasOne(TicketCategory::className(), ['id' => 'categoryId']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDepartment()
+    {
+        return $this->hasOne(Department::class, ['id' => 'departmentId']);
     }
 
     /**
@@ -265,7 +273,7 @@ class Ticket extends ActiveRecord
         $query = Ticket::find();
         $query->leftJoin(
             '{{%ticket_user_departments}}',
-            '{{%ticket}}.departmentId = {{%ticket_user_departments}}.departmentId')
+            '{{%tickets}}.departmentId = {{%ticket_user_departments}}.departmentId')
             ->andWhere(['{{%ticket_user_departments}}.userId' => $userId]);
 
         $dataProvider = new ActiveDataProvider([
@@ -273,6 +281,34 @@ class Ticket extends ActiveRecord
         ]);
 
         return $dataProvider;
+    }
+
+    /**
+     * Returns status label
+     *
+     * @return string
+     *
+     * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
+     */
+    public function getStatusLabel()
+    {
+        switch ($this->status) {
+            case self::STATUS_NOT_REPLIED:
+                return 'بی پاسخ';
+                break;
+            case self::STATUS_REPLIED:
+                return 'پاسخ داده شده';
+                break;
+            case self::STATUS_CLOSED:
+                return 'بسته شده';
+                break;
+            case self::STATUS_BLOCKED:
+                return 'بن شده';
+                break;
+            default:
+                return "نامشخص";
+                break;
+        }
     }
 }
 

@@ -47,7 +47,7 @@ class TicketCategory extends ActiveRecord
      */
     public static function tableName()
     {
-        return 'ticket_categories';
+        return '{{%ticket_categories}}';
     }
 
     /**

@@ -14,47 +14,68 @@ $this->title = 'مدیریت تیکت ها';
             <div class="panel-body">
                 <?= \yii\grid\GridView::widget([
                     'dataProvider' => $dataProvider,
-                    'filterModel' => "",
                     'columns' => [
                         ['class' => 'yii\grid\SerialColumn'],
                         [
-                            'attribute' => 'customerId'
+                            'label' => 'نام مشتری',
+                            'attribute' => 'customerId',
+                            'value' => function ($model) {
+                                return $model->getUserName();
+                            }
                         ],
                         [
+                            'label' => 'نام',
                             'attribute' => 'name'
                         ],
                         [
+                            'label' => 'موضوع',
                             'attribute' => 'subject'
                         ],
                         [
-                            'attribute' => 'departmentId'
-                        ],
-                        [
-                            'attribute' => 'categoryId'
-                        ],
-                        [
-                            'attribute' => 'status'
-                        ],
-                        [
-                            'attribute' => 'createAt'
-                        ],
-                        [
-                            'attribute' => 'updateAt'
-                        ]
-                    ],
-                    [
-                        'class' => 'yii\grid\ActionColumn',
-                        'template' => '{view}',
-                        'buttons' => [
-                            'view' => function ($url, $model, $key) {
-                                return \yii\helpers\Html::a('<i class="icon-eye-open"></i>', $url, ['title' => 'نمایش']);
+                            'label' => 'دپارتمان',
+                            'attribute' => 'departmentId',
+                            'value' => function ($model) {
+                                return $model->department->name;
                             },
                         ],
-                        'urlCreator' => function ($action, $model, $key, $index) {
-                            if ($action === 'view') {
-                                return \yii\helpers\Url::to(['/ticket/customer-care/ticket', 'id' => $model->id]);
+                        [
+                            'label' => 'دسته',
+                            'attribute' => 'categoryId',
+                            'value' => function ($model) {
+                                return $model->category->name;
+                            },
+                        ],
+                        [
+                            'label' => 'وضعیت',
+                            'attribute' => 'status',
+                            'value' => function ($model) {
+                                return $model->getStatusLabel();
+                            },
+                        ],
+                        [
+                            'label' => 'تاریخ ایجاد',
+                            'attribute' => 'createAt',
+                            'format' => 'dateTime',
+                        ],
+                        [
+                            'label' => 'تاریخ ویرایش',
+                            'attribute' => 'updateAt',
+                            'format' => 'dateTime',
+                        ],
+                        [
+                            'class' => 'yii\grid\ActionColumn',
+                            'template' => '{view}',
+                            'buttons' => [
+                                'view' => function ($url, $model, $key) {
+                                    return \yii\helpers\Html::a('<i class="icon-eye"></i>', $url, ['title' => 'نمایش']);
+                                },
+                            ],
+                            'urlCreator' => function ($action, $model, $key, $index) {
+                                if ($action === 'view') {
+                                    return \yii\helpers\Url::to(['/ticket/customer-care/ticket', 'id' => $model->id]);
+                                }
                             }
-                        }
+                        ],
                     ],
                 ]);
                 ?>
