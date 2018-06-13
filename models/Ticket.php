@@ -4,6 +4,7 @@ namespace aminkt\ticket\models;
 use aminkt\ticket\interfaces\CustomerCareInterface;
 use aminkt\ticket\interfaces\CustomerInterface;
 use yii\behaviors\TimestampBehavior;
+use yii\data\ActiveDataProvider;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
 
@@ -248,6 +249,30 @@ class Ticket extends ActiveRecord
             throw new \RuntimeException("Cant open ticket.");
         }
         return $this;
+    }
+
+    /**
+     * Get customer care tickets by department
+     *
+     * @param $userId
+     *
+     * @return ActiveDataProvider
+     *
+     * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
+     */
+    public static function getCustomerCareTickets($userId)
+    {
+        $query = Ticket::find();
+        $query->leftJoin(
+            '{{%ticket_user_departments}}',
+            '{{%ticket}}.departmentId = {{%ticket_user_departments}}.departmentId')
+            ->andWhere(['{{%ticket_user_departments}}.userId' => $userId]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query
+        ]);
+
+        return $dataProvider;
     }
 }
 

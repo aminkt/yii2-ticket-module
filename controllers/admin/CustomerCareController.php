@@ -15,9 +15,27 @@ use yii\web\Controller;
  */
 class CustomerCareController extends Controller
 {
+    /**
+     * Tickets list
+     *
+     * @return string
+     *
+     * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
+     */
     public function actionIndex()
     {
-        return $this->render('index');
+        $userId = \Yii::$app->getUser()->id;
+        if (!$userId) {
+            Alert::error('خطا', 'دسترسی به تیکت ها امکان پذیر نمی باشد.');
+            $this->goBack();
+        }
+
+        $dataProvider = Ticket::getCustomerCareTickets($userId);
+
+        return $this->render('index', [
+            'dataProvider' => $dataProvider
+        ]);
+
     }
 
     /**
