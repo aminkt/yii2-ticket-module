@@ -30,7 +30,7 @@ class Department extends ActiveRecord
      */
     public static function tableName()
     {
-        return '{{%departments}}';
+        return '{{%ticket_departments}}';
     }
 
     /**
