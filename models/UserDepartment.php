@@ -3,6 +3,9 @@
 namespace aminkt\ticket\models;
 
 use Yii;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
+use yii\db\Expression;
 
 /**
  * This is the model class for table "{{%ticket_user_departments}}".
@@ -13,7 +16,7 @@ use Yii;
  *
  * @property Department $department
  */
-class UserDepartment extends \yii\db\ActiveRecord
+class UserDepartment extends ActiveRecord
 {
     /**
      * {@inheritdoc}
@@ -34,6 +37,23 @@ class UserDepartment extends \yii\db\ActiveRecord
             [['createAt'], 'safe'],
             [['departmentId', 'userId'], 'unique', 'targetAttribute' => ['departmentId', 'userId']],
             [['departmentId'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['departmentId' => 'id']],
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['createAt'],
+                ],
+                // if you're using datetime instead of UNIX timestamp:
+                'value' => new Expression('NOW()'),
+            ],
         ];
     }
 

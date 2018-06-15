@@ -18,13 +18,11 @@ use yii\db\Expression;
  * @property string $email
  * @property string $subject
  * @property int $departmentId
- * @property int $categoryId
  * @property int $status
  * @property string $updateAt
  * @property string $createAt
  *
  * @property TicketMessage[] $ticketMessages
- * @property TicketCategory $category
  * @property string $userName
  * @property string $userEmail
  * @property \aminkt\ticket\interfaces\CustomerInterface $customer
@@ -72,11 +70,11 @@ class Ticket extends ActiveRecord
     {
         return [
             [['name', 'mobile', 'email', 'subject'], 'required'],
-            [['customerId', 'categoryId', 'status', 'departmentId'], 'integer'],
+            [['customerId', 'status', 'departmentId'], 'integer'],
             [['updateAt', 'createAt'], 'safe'],
             [['name', 'email', 'subject'], 'string', 'max' => 191],
             [['mobile'], 'string', 'max' => 15],
-            [['categoryId'], 'exist', 'skipOnError' => true, 'targetClass' => TicketCategory::class, 'targetAttribute' => ['categoryId' => 'id']],
+            [['departmentId'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['departmentId' => 'id']],
         ];
     }
 
@@ -93,7 +91,6 @@ class Ticket extends ActiveRecord
             'email' => 'Email',
             'subject' => 'Subject',
             'departmentId' => 'Department ID',
-            'categoryId' => 'Category ID',
             'status' => 'Status',
             'updateAt' => 'Update At',
             'createAt' => 'Create At',
@@ -106,14 +103,6 @@ class Ticket extends ActiveRecord
     public function getTicketMessages()
     {
         return $this->hasMany(TicketMessage::className(), ['ticketId' => 'id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getCategory()
-    {
-        return $this->hasOne(TicketCategory::className(), ['id' => 'categoryId']);
     }
 
     /**
@@ -190,13 +179,14 @@ class Ticket extends ActiveRecord
      * @param string $subject
      * @param string $message
      * @param CustomerInterface $customer
-     * @param TicketCategory $category
+     * @param Department $department
      *
      * @throws \RuntimeException    When cant create ticket.
      *
      * @return Ticket
      */
-    public static function createNewTicket(string $subject, string $message, CustomerInterface $customer, TicketCategory $category) : self {
+    public static function createNewTicket(string $subject, string $message, CustomerInterface $customer, Department $department): self
+    {
         // todo : Should implement.
     }
 

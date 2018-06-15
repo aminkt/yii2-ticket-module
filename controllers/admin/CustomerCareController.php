@@ -4,8 +4,12 @@ namespace aminkt\ticket\controllers\admin;
 
 use aminkt\ticket\models\Department;
 use aminkt\ticket\models\Ticket;
+use aminkt\ticket\models\UserDepartment;
+use aminkt\ticket\models\UserDepartmentForm;
 use aminkt\widgets\alert\Alert;
 use yii\data\ActiveDataProvider;
+use yii\db\StaleObjectException;
+use yii\filters\AccessControl;
 use yii\web\Controller;
 
 /**
@@ -15,6 +19,26 @@ use yii\web\Controller;
  */
 class CustomerCareController extends Controller
 {
+
+    /**
+     * @inheritdoc
+     */
+    public function behaviors()
+    {
+        return [
+            'access' => [
+                'class' => AccessControl::class,
+                'rules' => [
+                    [
+                        'actions' => ['index', 'department', 'change-department', 'user-department'],
+                        'allow' => true,
+                        'roles' => ['@'],
+                    ],
+                ],
+            ],
+        ];
+    }
+
     public function actionIndex()
     {
         return $this->render('index');
@@ -81,6 +105,57 @@ class CustomerCareController extends Controller
         }
         Alert::success('عملیات با موفقیت انجام شد', '');
         $this->redirect(['ticket']);
+    }
+
+    /**
+     * Assign departments to users
+     *
+     * @param null $userId
+     *
+     * @return string
+     * @throws StaleObjectException
+     * @throws \Exception
+     * @throws \Throwable
+     *
+     * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
+     */
+    public function actionUserDepartment($userId = null)
+    {
+        $adminModel = \aminkt\ticket\Ticket::getInstance()->adminModel;
+        $admins = $adminModel::find();
+        if (!$admins) {
+            Alert::error('خطا', 'ادمین یافت نشد');
+            $this->goBack();
+        }
+
+        $userDepartmentFrom = new UserDepartmentForm();
+
+        if ($userDepartmentFrom->load(\Yii::$app->getRequest()->post())) {
+            $userDepartmentFrom->userId = $userId;
+            if (!$userDepartmentFrom->save()) {
+                Alert::error('خطا', 'عملیات مورد نظر انجام نشد');
+            } else {
+                Alert::success('عملیات با موفقیت انجام شد', '');
+            }
+
+        } elseif ($userId) {
+            $userDepartments = UserDepartment::find()->where(['userId' => $userId])->all();
+            if ($userDepartments) {
+                foreach ($userDepartments as $userDepartment) {
+                    $userDepartmentFrom->departmentIds[] = $userDepartment->departmentId;
+                }
+            }
+            $userDepartmentFrom->userName = $adminModel::findOne($userId)->getName();
+        }
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $admins
+        ]);
+
+        return $this->render('user-department', [
+            'dataProvider' => $dataProvider,
+            'userDepartmentForm' => $userDepartmentFrom
+        ]);
     }
 
 }
