@@ -3,6 +3,7 @@
 namespace aminkt\ticket\controllers\admin;
 
 use aminkt\ticket\models\Department;
+use aminkt\ticket\models\Ticket;
 use aminkt\widgets\alert\Alert;
 use yii\data\ActiveDataProvider;
 use yii\web\Controller;
@@ -56,6 +57,30 @@ class CustomerCareController extends Controller
             'dataProvider' => $dataProvider,
             'model' => $model
         ]);
+    }
+
+    /**
+     * Change ticket department
+     *
+     * @param $id
+     * @param $departmentId
+     *
+     * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
+     */
+    public function actionChangeDepartment($id, $departmentId)
+    {
+        $ticket = Ticket::findOne($id);
+        if (!$ticket) {
+            Alert::error('خطا', 'تیکت مورد نظر یافت نشد');
+            $this->redirect(['ticket']);
+        }
+        $ticket->departmentId = $departmentId;
+        if (!$ticket->save()) {
+            Alert::error('خطا', 'تغییرات مورد نظر ذخیر نشد، دوباره تلاش کنید');
+            $this->redirect(['ticket']);
+        }
+        Alert::success('عملیات با موفقیت انجام شد', '');
+        $this->redirect(['ticket']);
     }
 
 }
