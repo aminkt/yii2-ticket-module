@@ -1,5 +1,7 @@
 <?php
+
 namespace aminkt\ticket\controllers\front;
+
 use aminkt\ticket\models\CustomerTempModel;
 use aminkt\ticket\models\Ticket;
 use yii\data\ActiveDataProvider;
@@ -61,8 +63,5 @@ class CustomerController extends \yii\rest\Controller
         $customer = \Yii::$app->getUser()->getIdentity();
         $ticketList = Ticket::find()->where('customerId' == $customer->getId())->all();
         return $ticketList;
-        }
-
     }
-
 }
