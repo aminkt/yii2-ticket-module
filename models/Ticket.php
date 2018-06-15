@@ -8,7 +8,7 @@ use yii\behaviors\TimestampBehavior;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
-
+use aminkt\widgets\alert\Alert;
 
 /**
  * This is the model class for table "tickets".
@@ -65,7 +65,7 @@ class Ticket extends ActiveRecord
      */
     public static function tableName()
     {
-        return '{{%tickets}}';
+        return "{{%tickets}}";
     }
 
     /**
@@ -189,7 +189,7 @@ class Ticket extends ActiveRecord
     }
 
     /**
-     * create new ticket
+     * Create new ticket.
      *
      * @param string $subject
      * @param CustomerInterface $customer
@@ -237,7 +237,6 @@ class Ticket extends ActiveRecord
      * create random characters for tracking code
      *
      * @param int $length
-     *
      * @return string
      *
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
@@ -403,7 +402,7 @@ class CustomerTempModel implements CustomerInterface
      */
     function getId()
     {
-        return $this->getId();
+        return $this->id;
     }
 
     /**
