@@ -1,13 +1,9 @@
 <?php
 namespace aminkt\ticket\controllers\front;
 
-use aminkt\ticket\models\CustomerTempModel;
 use aminkt\ticket\models\Ticket;
-use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
 use yii\filters\auth\HttpBearerAuth;
-use aminkt\widgets\alert\Alert;
-use aminkt\uploadManager\components\Upload;
 
 /**
  * Class CustomerController
@@ -62,10 +58,11 @@ class CustomerController extends \yii\rest\Controller
         $ticketList = Ticket::find()->where('customerId' == $customer->getId())->all();
         return $ticketList;
     }
+
     /**
      * return ticket with it's messages by ticket trackingCode
      *
-     * @return null|static
+     * @return Ticket
      *
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      */

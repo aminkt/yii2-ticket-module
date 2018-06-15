@@ -1,5 +1,7 @@
 <?php
+
 namespace aminkt\ticket\models;
+
 use aminkt\ticket\interfaces\CustomerCareInterface;
 use aminkt\ticket\interfaces\CustomerInterface;
 use aminkt\widgets\alert\Alert;
@@ -123,7 +125,7 @@ class Ticket extends ActiveRecord
      *
      * @return string
      */
-    public function getSubject() : string
+    public function getSubject(): string
     {
         return $this->subject;
     }
@@ -133,7 +135,7 @@ class Ticket extends ActiveRecord
      *
      * @return string
      */
-    function getUserName() : string
+    function getUserName(): string
     {
         return $this->name;
     }
@@ -143,7 +145,7 @@ class Ticket extends ActiveRecord
      *
      * @return string
      */
-    function getUserMobile() : string
+    function getUserMobile(): string
     {
         return $this->mobile;
 
@@ -154,7 +156,7 @@ class Ticket extends ActiveRecord
      *
      * @return string
      */
-    function getUserEmail() : string
+    function getUserEmail(): string
     {
         return $this->email;
 
@@ -162,9 +164,11 @@ class Ticket extends ActiveRecord
 
     /**
      * Return true if customer model not available and false if available.
+     *
      * @return bool
      */
-    function isGuestTicket() : bool {
+    function isGuestTicket(): bool
+    {
         return $this->customerId ? false : true;
     }
 
@@ -236,6 +240,7 @@ class Ticket extends ActiveRecord
      * create random characters for tracking code
      *
      * @param int $length
+     *
      * @return string
      *
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
@@ -416,6 +421,7 @@ class CustomerTempModel implements CustomerInterface
 
     /**
      * Return user email.
+     *
      * @return string|null
      */
     function getEmail()
