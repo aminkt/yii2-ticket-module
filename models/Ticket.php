@@ -6,6 +6,7 @@ use aminkt\ticket\interfaces\CustomerCareInterface;
 use aminkt\ticket\interfaces\CustomerInterface;
 use aminkt\widgets\alert\Alert;
 use yii\behaviors\TimestampBehavior;
+use yii\data\ActiveDataProvider;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
 
@@ -19,13 +20,12 @@ use yii\db\Expression;
  * @property string $mobile
  * @property string $email
  * @property string $subject
- * @property int $categoryId
+ * @property int $departmentId
  * @property int $status
  * @property string $updateAt
  * @property string $createAt
  *
  * @property TicketMessage[] $ticketMessages
- * @property TicketCategories $category
  * @property string $userName
  * @property string $userEmail
  * @property \aminkt\ticket\interfaces\CustomerInterface $customer
@@ -33,13 +33,12 @@ use yii\db\Expression;
  *
  * @package aminkt\ticket
  */
-class Tickets extends ActiveRecord
+class Ticket extends ActiveRecord
 {
     const STATUS_NOT_REPLIED = 1;
     const STATUS_REPLIED = 2;
     const STATUS_CLOSED = 3;
     const STATUS_BLOCKED = 4;
-
 
     /**
      * @inheritdoc
@@ -64,7 +63,7 @@ class Tickets extends ActiveRecord
      */
     public static function tableName()
     {
-        return 'tickets';
+        return '{{%tickets}}';
     }
 
     /**
@@ -74,11 +73,11 @@ class Tickets extends ActiveRecord
     {
         return [
             [['name', 'mobile', 'email', 'subject'], 'required'],
-            [['customerId', 'categoryId', 'status', 'departmentId'], 'integer'],
+            [['customerId', 'status', 'departmentId'], 'integer'],
             [['updateAt', 'createAt'], 'safe'],
             [['name', 'email', 'subject'], 'string', 'max' => 191],
             [['mobile'], 'string', 'max' => 15],
-            [['categoryId'], 'exist', 'skipOnError' => true, 'targetClass' => TicketCategories::class, 'targetAttribute' => ['categoryId' => 'id']],
+            [['departmentId'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['departmentId' => 'id']],
         ];
     }
 
@@ -94,7 +93,7 @@ class Tickets extends ActiveRecord
             'mobile' => 'موبایل',
             'email' => 'ایمیل',
             'subject' => 'موضوع',
-            'categoryId' => 'دسته بندی',
+            'departmentId' => 'شناسه دپارتمان',
             'status' => 'موقعیت',
             'updateAt' => 'تاریخ ویرایش',
             'createAt' => 'تاریخ ایجاد',
@@ -112,9 +111,9 @@ class Tickets extends ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getCategory()
+    public function getDepartment()
     {
-        return $this->hasOne(TicketCategories::className(), ['id' => 'categoryId']);
+        return $this->hasOne(Department::class, ['id' => 'departmentId']);
     }
 
     /**
@@ -122,7 +121,7 @@ class Tickets extends ActiveRecord
      *
      * @return string
      */
-    public function getSubject(): string
+    public function getSubject() : string
     {
         return $this->subject;
     }
@@ -132,7 +131,7 @@ class Tickets extends ActiveRecord
      *
      * @return string
      */
-    function getUserName(): string
+    function getUserName() : string
     {
         return $this->name;
     }
@@ -142,7 +141,7 @@ class Tickets extends ActiveRecord
      *
      * @return string
      */
-    function getUserMobile(): string
+    function getUserMobile() : string
     {
         return $this->mobile;
 
@@ -153,7 +152,7 @@ class Tickets extends ActiveRecord
      *
      * @return string
      */
-    function getUserEmail(): string
+    function getUserEmail() : string
     {
         return $this->email;
 
@@ -163,8 +162,7 @@ class Tickets extends ActiveRecord
      * Return true if customer model not available and false if available.
      * @return bool
      */
-    function isGuestTicket(): bool
-    {
+    function isGuestTicket() : bool {
         return $this->customerId ? false : true;
     }
 
@@ -193,11 +191,11 @@ class Tickets extends ActiveRecord
      * @param string $subject
      * @param string $message
      * @param CustomerInterface $customer
-     * @param TicketCategories $category
+     * @param Department $department
      *
      * @throws \RuntimeException    When cant create ticket.
      *
-     * @return Tickets
+     * @return Ticket
      */
     public static function createNewTicket(string $subject, CustomerInterface $customer, TicketCategories $category): self
     {
@@ -217,6 +215,7 @@ class Tickets extends ActiveRecord
             throw new \RuntimeException('تیکت ذخیره نشد.');
         }
     }
+
 
     /**
      * Send new message to current ticket.
@@ -269,6 +268,58 @@ class Tickets extends ActiveRecord
             throw new \RuntimeException("Cant open ticket.");
         }
         return $this;
+    }
+
+    /**
+     * Get customer care tickets by department
+     *
+     * @param $userId
+     *
+     * @return ActiveDataProvider
+     *
+     * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
+     */
+    public static function getCustomerCareTickets($userId)
+    {
+        $query = Ticket::find();
+        $query->leftJoin(
+            '{{%ticket_user_departments}}',
+            '{{%tickets}}.departmentId = {{%ticket_user_departments}}.departmentId')
+            ->andWhere(['{{%ticket_user_departments}}.userId' => $userId]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query
+        ]);
+
+        return $dataProvider;
+    }
+
+    /**
+     * Returns status label
+     *
+     * @return string
+     *
+     * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
+     */
+    public function getStatusLabel()
+    {
+        switch ($this->status) {
+            case self::STATUS_NOT_REPLIED:
+                return 'بی پاسخ';
+                break;
+            case self::STATUS_REPLIED:
+                return 'پاسخ داده شده';
+                break;
+            case self::STATUS_CLOSED:
+                return 'بسته شده';
+                break;
+            case self::STATUS_BLOCKED:
+                return 'بن شده';
+                break;
+            default:
+                return "نامشخص";
+                break;
+        }
     }
 }
 
