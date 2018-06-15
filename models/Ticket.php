@@ -237,6 +237,7 @@ class Ticket extends ActiveRecord
      * create random characters for tracking code
      *
      * @param int $length
+     *
      * @return string
      *
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
@@ -378,6 +379,7 @@ class Ticket extends ActiveRecord
 
 /**
  * Class CustomerTempModel  for guest customers
+ *
  * @package aminkt\ticket\models
  */
 class CustomerTempModel implements CustomerInterface

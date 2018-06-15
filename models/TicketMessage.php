@@ -118,10 +118,10 @@ class TicketMessage extends ActiveRecord
      */
     public function getUser()
     {
-        if($this->isCustomerCareReply()){
+        if ($this->isCustomerCareReply()) {
             // todo : Should return customer care user model.
             return null;
-        }else{
+        } else {
             return $this->ticket->customer;
         }
     }
@@ -131,8 +131,9 @@ class TicketMessage extends ActiveRecord
      *
      * @return bool
      */
-    public function isCustomerCareReply() : bool {
-        return $this->customerCareId?true:false;
+    public function isCustomerCareReply(): bool
+    {
+        return $this->customerCareId ? true : false;
     }
 
     /**
@@ -149,7 +150,8 @@ class TicketMessage extends ActiveRecord
      *
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      */
-    public static function sendNewMessage(int $id, string $message, string $attachments, CustomerCareInterface $customerCare=null) : self {
+    public static function sendNewMessage(int $id, string $message, string $attachments, CustomerCareInterface $customerCare = null): self
+    {
         $ticketMessage = new TicketMessage();
         $ticketMessage->ticketId = $id;
         $ticketMessage->message = $message;

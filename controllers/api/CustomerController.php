@@ -1,9 +1,10 @@
 <?php
+
 namespace aminkt\ticket\controllers\front;
+
 use aminkt\ticket\models\CustomerTempModel;
-use aminkt\ticket\models\TicketCategory;
+use aminkt\ticket\models\Department;
 use aminkt\ticket\models\Ticket;
-use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
 use yii\filters\auth\HttpBearerAuth;
 use aminkt\widgets\alert\Alert;
@@ -72,9 +73,9 @@ class CustomerController extends \yii\rest\Controller
                 $email = \Yii::$app->getRequest()->post('email');
                 $customer = new CustomerTempModel($name, $email, $mobile);
             }
-            $category = TicketCategory::findOne(\Yii::$app->getRequest()->post('categoryId'));
+            $department = Department::findOne(\Yii::$app->getRequest()->post('departmentId'));
             $subject = \Yii::$app->getRequest()->post('subject');
-            $model = Ticket::createNewTicket($subject, $customer, $category);
+            $model = Ticket::createNewTicket($subject, $customer, $department);
         }
         $message = \Yii::$app->getRequest()->post('message');
         $attachment = \Yii::$app->getRequest()->post('attachment');
