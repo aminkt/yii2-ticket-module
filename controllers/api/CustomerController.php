@@ -7,6 +7,8 @@ use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
 use yii\filters\auth\HttpBearerAuth;
 use aminkt\widgets\alert\Alert;
+use aminkt\uploadManager\components\Upload;
+
 /**
  * Class CustomerController
  *
@@ -76,8 +78,40 @@ class CustomerController extends \yii\rest\Controller
         }
         $message = \Yii::$app->getRequest()->post('message');
         $attachment = \Yii::$app->getRequest()->post('attachment');
+        if (is_numeric($attachment)) {
+            $attachment = (string)$attachment;
+        } else {
+            $file = Upload::directUpload('attachment');
+            $attachment = (string)$file->id;
+        }
         $ticketMessage = $model->sendNewMessage($message, $attachment);
         return $ticketMessage;
+    }
+
+    /**
+     * close ticket
+     *
+     * @return bool
+     *
+     * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
+     */
+    public function actionClose()
+    {
+        $model = Ticket::findOne(\Yii::$app->getRequest()->get('ticketId'));
+        if (!$model) {
+            Alert::error('تیکت پیدا نشد', '');
+            return false;
+        } else {
+            if ($model->closeTicket()) {
+                Alert::success('تیکت با موفقیت بسته شد', 'اسم تیکت جدید : ' . $model->subject);
+                return true;
+            } else {
+                Alert::success('تیکت بسته نشد', $model->subject);
+                return false;
+            }
+
+        }
+
     }
 
 }
