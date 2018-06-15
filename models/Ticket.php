@@ -1,7 +1,5 @@
 <?php
-
 namespace aminkt\ticket\models;
-
 use aminkt\ticket\interfaces\CustomerCareInterface;
 use aminkt\ticket\interfaces\CustomerInterface;
 use aminkt\widgets\alert\Alert;
@@ -25,6 +23,7 @@ use yii\db\Expression;
  * @property int $status
  * @property string $updateAt
  * @property string $createAt
+ * @property string $trackingCode
  *
  * @property TicketMessage[] $ticketMessages
  * @property string $userName
@@ -190,13 +189,15 @@ class Ticket extends ActiveRecord
     }
 
     /**
-     * Create new ticket.
+     * create new ticket
      *
      * @param string $subject
      * @param CustomerInterface $customer
      * @param Department $department
      *
      * @return Ticket
+     *
+     * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      */
     public static function createNewTicket(string $subject, CustomerInterface $customer, Department $department): self
     {
@@ -207,7 +208,8 @@ class Ticket extends ActiveRecord
         $ticket->customerId = $customer->getId();
         $ticket->departmentId = $department->id;
         $ticket->subject = $subject;
-        $ticket->status = 1;
+        $ticket->trackingCode = $ticket->generateTrackingCode();
+        $ticket->status = self::STATUS_NOT_REPLIED;
         if ($ticket->save()) {
             Alert::success('تیکت با موفقیت ایجاد شد', 'اسم تیکت جدید : ' . $ticket->name);
             return $ticket;
@@ -217,6 +219,38 @@ class Ticket extends ActiveRecord
         }
     }
 
+    /**
+     * create trackingCode for each ticket
+     *
+     * @return string
+     *
+     * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
+     */
+    public function generateTrackingCode()
+    {
+        $date = gmdate('yndhis', time());
+        $finalCode = $this->generateRandomString(4) . $date . $this->generateRandomString(4);
+        return $finalCode;
+    }
+
+    /**
+     * create random characters for tracking code
+     *
+     * @param int $length
+     * @return string
+     *
+     * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
+     */
+    function generateRandomString($length = 10)
+    {
+        $characters = 'abcdefghijklmnopqrstuvwxyz';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
+    }
 
     /**
      * Send new message to current ticket.
@@ -228,6 +262,8 @@ class Ticket extends ActiveRecord
      * @throws \RuntimeException    When cant create ticket.
      *
      * @return TicketMessage
+     *
+     * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      */
     public function sendNewMessage(string $message, string $attachments, CustomerCareInterface $customerCare = null): TicketMessage
     {
@@ -340,6 +376,10 @@ class Ticket extends ActiveRecord
     }
 }
 
+/**
+ * Class CustomerTempModel  for guest customers
+ * @package aminkt\ticket\models
+ */
 class CustomerTempModel implements CustomerInterface
 {
     public $id = null;

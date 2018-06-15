@@ -1,10 +1,7 @@
 <?php
-
 namespace aminkt\ticket\models;
-
 use aminkt\ticket\interfaces\CustomerCareInterface;
 use aminkt\ticket\interfaces\CustomerInterface;
-use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
@@ -43,7 +40,6 @@ class TicketMessage extends ActiveRecord
             ],
         ];
     }
-
 
     /**
      * @inheritdoc
@@ -122,10 +118,10 @@ class TicketMessage extends ActiveRecord
      */
     public function getUser()
     {
-        if ($this->isCustomerCareReply()) {
+        if($this->isCustomerCareReply()){
             // todo : Should return customer care user model.
             return null;
-        } else {
+        }else{
             return $this->ticket->customer;
         }
     }
@@ -135,9 +131,8 @@ class TicketMessage extends ActiveRecord
      *
      * @return bool
      */
-    public function isCustomerCareReply(): bool
-    {
-        return $this->customerCareId ? true : false;
+    public function isCustomerCareReply() : bool {
+        return $this->customerCareId?true:false;
     }
 
     /**
@@ -151,16 +146,17 @@ class TicketMessage extends ActiveRecord
      * @throws \RuntimeException    When cant create ticket.
      *
      * @return TicketMessage
+     *
+     * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      */
-    public static function sendNewMessage(int $id, string $message, string $attachments, CustomerCareInterface $customerCare = null): self
-    {
+    public static function sendNewMessage(int $id, string $message, string $attachments, CustomerCareInterface $customerCare=null) : self {
         $ticketMessage = new TicketMessage();
         $ticketMessage->ticketId = $id;
         $ticketMessage->message = $message;
         $ticketMessage->attachments = $attachments;
         if ($customerCare)
             $ticketMessage->customerCareId = $customerCare->getId();
+        $ticketMessage->save();
         return $ticketMessage;
     }
-
 }
