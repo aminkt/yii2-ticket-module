@@ -8,7 +8,6 @@ use yii\behaviors\TimestampBehavior;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
-use aminkt\widgets\alert\Alert;
 
 /**
  * This is the model class for table "tickets".

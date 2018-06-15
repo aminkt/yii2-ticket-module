@@ -46,7 +46,7 @@ class TicketMessage extends ActiveRecord
      */
     public static function tableName()
     {
-        return '{{%ticket_messages}}';
+        return "{{%ticket_messages}}";
     }
 
     /**
