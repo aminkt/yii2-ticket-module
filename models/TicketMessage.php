@@ -1,10 +1,14 @@
 <?php
+
 namespace aminkt\ticket\models;
+
 use aminkt\ticket\interfaces\CustomerCareInterface;
 use aminkt\ticket\interfaces\CustomerInterface;
+use aminkt\uploadManager\UploadManager;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
+use yii\web\NotFoundHttpException;
 
 /**
  * This is the model class for table "ticket_messages".
@@ -100,13 +104,39 @@ class TicketMessage extends ActiveRecord
     /**
      * Return attachments models.
      *
-     * @return string
+     * @return array
      *
-     * todo : Change return type to upload manager files.
+     * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
      */
     public function getAttachments()
     {
-        return $this->attachments;
+        $items = explode(',', $this->attachments);
+        $attachments = [];
+        foreach ($items as $item) {
+            try {
+                $attachments[] = UploadManager::getInstance()->getFile($item);
+            } catch (NotFoundHttpException $e) {
+                \Yii::error("File not found.");
+            }
+        }
+        return $attachments;
+    }
+
+    /**
+     * Return attachments url
+     *
+     * @return array
+     *
+     * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
+     */
+    public function getAttachmentUrl()
+    {
+        $urls = [];
+        foreach ($this->getAttachments() as $attachment) {
+            $urls[] = $attachment->getUrl();
+        }
+
+        return $urls;
     }
 
     /**
@@ -114,13 +144,14 @@ class TicketMessage extends ActiveRecord
      *
      * @return CustomerCareInterface|CustomerInterface
      *
-     * todo : should implement.
+     * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
      */
     public function getUser()
     {
         if ($this->isCustomerCareReply()) {
-            // todo : Should return customer care user model.
-            return null;
+            $adminModel = \aminkt\ticket\Ticket::getInstance()->adminModel;
+            $customerCare = $adminModel::findOne($this->customerCareId);
+            return $customerCare;
         } else {
             return $this->ticket->customer;
         }

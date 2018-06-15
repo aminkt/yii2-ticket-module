@@ -46,7 +46,7 @@ $this->title = 'مدیریت دپارتمان';
                                 ],
                                 'urlCreator' => function ($action, $model, $key, $index) {
                                     if ($action === 'update') {
-                                        return \yii\helpers\Url::to(['/ticket/customer-care/department', 'id' => $model->id]);
+                                        return \yii\helpers\Url::to(['/ticket/admin/customer-care/department', 'id' => $model->id]);
                                     }
                                 }
                             ],

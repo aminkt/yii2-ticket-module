@@ -129,7 +129,7 @@ class CustomerCareController extends Controller
 
             if ($model->load(\Yii::$app->getRequest()->post())) {
                 try {
-                    $ticket->sendNewMessage($model->getMessage(), $model->getAttachments(), \Yii::$app->getUser()->getIdentity());
+                    $ticket->sendNewMessage($model->getMessage(), $model->attachments, \Yii::$app->getUser()->getIdentity());
                     try {
                         $ticket->setStatus($ticket::STATUS_REPLIED);
                     } catch (RuntimeException $e) {
@@ -144,8 +144,6 @@ class CustomerCareController extends Controller
                     return $this->redirect(['ticket', 'id' => $id]);
                 }
             }
-//
-//            var_dump(\Yii::$app->getRequest()->post());die();
             if ($ticket->load(\Yii::$app->getRequest()->post())) {
                 if (!$ticket->save()) {
                     Alert::error('خطا', 'تغییرات ذخیره نشد');
