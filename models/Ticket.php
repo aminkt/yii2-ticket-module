@@ -5,6 +5,7 @@ namespace aminkt\ticket\models;
 use aminkt\ticket\interfaces\CustomerCareInterface;
 use aminkt\ticket\interfaces\CustomerInterface;
 use aminkt\widgets\alert\Alert;
+use Imagine\Exception\RuntimeException;
 use yii\behaviors\TimestampBehavior;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveRecord;
@@ -29,6 +30,8 @@ use yii\db\Expression;
  * @property string $userName
  * @property string $userEmail
  * @property \aminkt\ticket\interfaces\CustomerInterface $customer
+ * @property string $statusLabel
+ * @property \yii\db\ActiveQuery $department
  * @property string $userMobile
  *
  * @package aminkt\ticket
@@ -93,10 +96,11 @@ class Ticket extends ActiveRecord
             'mobile' => 'موبایل',
             'email' => 'ایمیل',
             'subject' => 'موضوع',
-            'departmentId' => 'شناسه دپارتمان',
+            'departmentId' => 'دپارتمان',
             'status' => 'موقعیت',
             'updateAt' => 'تاریخ ویرایش',
             'createAt' => 'تاریخ ایجاد',
+            'userName' => 'نام کاربر',
         ];
     }
 
@@ -189,22 +193,19 @@ class Ticket extends ActiveRecord
      * Create new ticket.
      *
      * @param string $subject
-     * @param string $message
      * @param CustomerInterface $customer
      * @param Department $department
      *
-     * @throws \RuntimeException    When cant create ticket.
-     *
      * @return Ticket
      */
-    public static function createNewTicket(string $subject, CustomerInterface $customer, TicketCategories $category): self
+    public static function createNewTicket(string $subject, CustomerInterface $customer, Department $department): self
     {
-        $ticket = new Tickets();
+        $ticket = new Ticket();
         $ticket->name = $customer->getName();
         $ticket->mobile = $customer->getMobile();
         $ticket->email = $customer->getEmail();
         $ticket->customerId = $customer->getId();
-        $ticket->categoryId = $category->id;
+        $ticket->departmentId = $department->id;
         $ticket->subject = $subject;
         $ticket->status = 1;
         if ($ticket->save()) {
@@ -230,9 +231,7 @@ class Ticket extends ActiveRecord
      */
     public function sendNewMessage(string $message, string $attachments, CustomerCareInterface $customerCare = null): TicketMessage
     {
-
         $message = TicketMessage::sendNewMessage($this->id, $message, $attachments, $customerCare);
-        // todo : Should implement.
         return $message;
     }
 
@@ -320,6 +319,24 @@ class Ticket extends ActiveRecord
                 return "نامشخص";
                 break;
         }
+    }
+
+    /**
+     * Set ticket status
+     *
+     * @param $status
+     *
+     * @return $this
+     *
+     * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
+     */
+    public function setStatus($status)
+    {
+        $this->status = $status;
+        if (!$this->save()) {
+            throw new RuntimeException('Status did not change');
+        }
+        return $this;
     }
 }
 

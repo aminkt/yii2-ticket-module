@@ -4,9 +4,11 @@ namespace aminkt\ticket\controllers\admin;
 
 use aminkt\ticket\models\Department;
 use aminkt\ticket\models\Ticket;
+use aminkt\ticket\models\TicketMessage;
 use aminkt\ticket\models\UserDepartment;
 use aminkt\ticket\models\UserDepartmentForm;
 use aminkt\widgets\alert\Alert;
+use Imagine\Exception\RuntimeException;
 use yii\data\ActiveDataProvider;
 use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
@@ -30,7 +32,7 @@ class CustomerCareController extends Controller
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'department', 'change-department', 'user-department'],
+                        'actions' => ['index', 'department', 'change-department', 'user-department', 'ticket'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -69,7 +71,7 @@ class CustomerCareController extends Controller
      *
      * @return string|\yii\web\Response
      *
-     * @author Saghar Mojdehi <saghar.mojdehi@gmail.ocm>
+     * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
      */
     public function actionDepartment($id = null)
     {
@@ -101,6 +103,14 @@ class CustomerCareController extends Controller
         ]);
     }
 
+    /**
+     * View ticket details and reply
+     *
+     * @param $id
+     *
+     * @return string
+     * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
+     */
     public function actionTicket($id)
     {
         $ticket = Ticket::findOne($id);
@@ -109,6 +119,50 @@ class CustomerCareController extends Controller
             $this->redirect(['index']);
         }
 
+        $dataProvider = new ActiveDataProvider([
+            'query' => TicketMessage::find()->where(['ticketId' => $ticket->id])
+        ]);
+
+        $model = new TicketMessage();
+
+        if (\Yii::$app->request->isPost) {
+
+            if ($model->load(\Yii::$app->getRequest()->post())) {
+                try {
+                    $ticket->sendNewMessage($model->getMessage(), $model->getAttachments(), \Yii::$app->getUser()->getIdentity());
+                    try {
+                        $ticket->setStatus($ticket::STATUS_REPLIED);
+                    } catch (RuntimeException $e) {
+                        Alert::error('خطا', 'وضعیت تیکت ویرایش نشد');
+                        return $this->redirect(['ticket', 'id' => $id]);
+                    }
+                } catch (\Exception $e) {
+                    Alert::error('خطا', 'پاسخ تیکت ارسال نشد، دوباره تلاش کنید');
+                    return $this->redirect(['ticket', 'id' => $id]);
+                } catch (\Throwable $e) {
+                    Alert::error('خطا', 'پاسخ تیکت ارسال نشد، دوباره تلاش کنید');
+                    return $this->redirect(['ticket', 'id' => $id]);
+                }
+            }
+//
+//            var_dump(\Yii::$app->getRequest()->post());die();
+            if ($ticket->load(\Yii::$app->getRequest()->post())) {
+                if (!$ticket->save()) {
+                    Alert::error('خطا', 'تغییرات ذخیره نشد');
+                    return $this->redirect(['ticket', 'id' => $id]);
+                }
+            }
+
+            Alert::success('عملیات با موفقیت انجام شد', '');
+            return $this->redirect(['ticket', 'id' => $id]);
+        }
+
+
+        return $this->render('ticket', [
+            'ticket' => $ticket,
+            'dataProvider' => $dataProvider,
+            'model' => $model
+        ]);
 
     }
 

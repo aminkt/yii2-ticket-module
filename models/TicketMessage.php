@@ -22,7 +22,7 @@ use yii\db\Expression;
  *
  * @property \aminkt\ticket\interfaces\CustomerCareInterface|null $customerCareUser
  * @property \aminkt\ticket\interfaces\CustomerCareInterface|\aminkt\ticket\interfaces\CustomerInterface $user
- * @property Tickets $ticket
+ * @property Ticket $ticket
  */
 class TicketMessage extends ActiveRecord
 {
@@ -50,7 +50,7 @@ class TicketMessage extends ActiveRecord
      */
     public static function tableName()
     {
-        return 'ticket_messages';
+        return '{{%ticket_messages}}';
     }
 
     /**
@@ -61,10 +61,9 @@ class TicketMessage extends ActiveRecord
         return [
             [['message'], 'string'],
             [['ticketId', 'customerCareId'], 'integer'],
-            [['attachments'], 'required'],
             [['updateAt', 'createAt'], 'safe'],
             [['attachments'], 'string', 'max' => 191],
-            [['ticketId'], 'exist', 'skipOnError' => true, 'targetClass' => Tickets::class, 'targetAttribute' => ['ticketId' => 'id']],
+            [['ticketId'], 'exist', 'skipOnError' => true, 'targetClass' => Ticket::class, 'targetAttribute' => ['ticketId' => 'id']],
         ];
     }
 
@@ -75,12 +74,12 @@ class TicketMessage extends ActiveRecord
     {
         return [
             'id' => 'ID',
-            'message' => 'Message',
-            'ticketId' => 'Ticket ID',
-            'attachments' => 'Attachments',
+            'message' => 'متن پیام',
+            'ticketId' => 'شناسه تیکت',
+            'attachments' => 'پیوست ها',
             'customerCareId' => 'Customer Care ID',
-            'updateAt' => 'Update At',
-            'createAt' => 'Create At',
+            'updateAt' => 'تاریخ ویرایش',
+            'createAt' => 'تاریخ ایجاد',
         ];
     }
 
@@ -89,7 +88,7 @@ class TicketMessage extends ActiveRecord
      */
     public function getTicket()
     {
-        return $this->hasOne(Tickets::className(), ['id' => 'ticketId']);
+        return $this->hasOne(Ticket::class, ['id' => 'ticketId']);
     }
 
     /**
