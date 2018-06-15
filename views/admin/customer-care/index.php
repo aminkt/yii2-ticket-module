@@ -39,13 +39,6 @@ $this->title = 'مدیریت تیکت ها';
                             },
                         ],
                         [
-                            'label' => 'دسته',
-                            'attribute' => 'categoryId',
-                            'value' => function ($model) {
-                                return $model->category->name;
-                            },
-                        ],
-                        [
                             'label' => 'وضعیت',
                             'attribute' => 'status',
                             'value' => function ($model) {
