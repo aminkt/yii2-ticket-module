@@ -1,10 +1,7 @@
 <?php
-
 namespace aminkt\ticket\models;
-
 use aminkt\ticket\interfaces\CustomerCareInterface;
 use aminkt\ticket\interfaces\CustomerInterface;
-use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
@@ -44,13 +41,12 @@ class TicketMessage extends ActiveRecord
         ];
     }
 
-
     /**
      * @inheritdoc
      */
     public static function tableName()
     {
-        return 'ticket_messages';
+        return "{{%ticket_messages}}";
     }
 
     /**
@@ -151,9 +147,17 @@ class TicketMessage extends ActiveRecord
      * @throws \RuntimeException    When cant create ticket.
      *
      * @return TicketMessage
+     *
+     * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      */
     public static function sendNewMessage(int $id, string $message, string $attachments, CustomerCareInterface $customerCare=null) : self {
-        // todo : Should implement.
+        $ticketMessage = new TicketMessage();
+        $ticketMessage->ticketId = $id;
+        $ticketMessage->message = $message;
+        $ticketMessage->attachments = $attachments;
+        if ($customerCare)
+            $ticketMessage->customerCareId = $customerCare->getId();
+        $ticketMessage->save();
+        return $ticketMessage;
     }
-
 }

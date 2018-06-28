@@ -16,7 +16,7 @@ use yii\db\Expression;
  * @property string $updateAt
  * @property string $createAt
  *
- * @property Ticket[] $tickets
+ * @property Tickets[] $tickets
  */
 class TicketCategory extends ActiveRecord
 {
