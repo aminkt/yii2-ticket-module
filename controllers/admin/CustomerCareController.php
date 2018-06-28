@@ -3,7 +3,6 @@
 namespace aminkt\ticket\controllers\admin;
 
 use aminkt\ticket\models\Department;
-use aminkt\ticket\models\Ticket;
 use aminkt\widgets\alert\Alert;
 use yii\data\ActiveDataProvider;
 use yii\web\Controller;
