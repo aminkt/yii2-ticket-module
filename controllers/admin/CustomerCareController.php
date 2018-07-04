@@ -1,6 +1,7 @@
 <?php
 
 namespace aminkt\ticket\controllers\admin;
+use aminkt\ticket\Ticket;
 
 use aminkt\ticket\models\Department;
 use aminkt\ticket\models\Ticket;
@@ -260,5 +261,8 @@ class CustomerCareController extends Controller
             'userDepartmentForm' => $userDepartmentFrom
         ]);
     }
+
+
+    
 
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace aminkt\ticket;
+namespace api\modules\ticket;
 
 use aminkt\ticket\interfaces\CustomerCareInterface;
 use aminkt\ticket\interfaces\CustomerInterface;
@@ -41,5 +41,4 @@ class Ticket extends \yii\base\Module
 
         return \Yii::$app->getModule('ticket');
     }
-
 }
