@@ -2,6 +2,9 @@
 
 namespace api\modules\ticket;
 
+use aminkt\ticket\interfaces\CustomerCareInterface;
+use aminkt\ticket\interfaces\CustomerInterface;
+
 /**
  * ticket module definition class
  */
@@ -10,7 +13,13 @@ class Ticket extends \yii\base\Module
     /**
      * @inheritdoc
      */
-    public $controllerNamespace = 'api\modules\ticket\controllers';
+    public $controllerNamespace = 'aminkt\ticket\controllers';
+
+    /** @var CustomerCareInterface Admin model */
+    public $adminModel;
+
+    /** @var CustomerInterface user model */
+    public $userModel;
 
     /**
      * @inheritdoc
@@ -33,4 +42,3 @@ class Ticket extends \yii\base\Module
         return \Yii::$app->getModule('ticket');
     }
 }
-

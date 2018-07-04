@@ -19,14 +19,6 @@ class m180326_075529_ticket_modules extends Migration
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
         }
 
-        $this->createTable("{{%ticket_categories}}", [
-            'id' => $this->primaryKey(),
-            'name' => $this->string(191)->notNull(),
-            'status' => $this->smallInteger(1)->notNull()->defaultValue(1),
-            'updateAt' => $this->dateTime(),
-            'createAt' => $this->dateTime(),
-        ], $tableOptions);
-
         $this->createTable("{{%tickets}}", [
             'id' => $this->primaryKey(),
             'customerId' => $this->integer(),
@@ -34,7 +26,6 @@ class m180326_075529_ticket_modules extends Migration
             'mobile' => $this->string(15),
             'email' => $this->string(191),
             'subject' => $this->string(191)->notNull(),
-            'categoryId' => $this->integer(),
             'status' => $this->smallInteger(1)->notNull()->defaultValue(1),
             'updateAt' => $this->dateTime(),
             'createAt' => $this->dateTime(),
@@ -53,7 +44,6 @@ class m180326_075529_ticket_modules extends Migration
 
         // Create forging keys.
 
-        $this->addForeignKey("ticket_fk_ticketCategory_by_categoryId", '{{%tickets}}', 'categoryId', "{{%ticket_categories}}", 'id', 'SET NULL', 'CASCADE');
         $this->addForeignKey("ticketMessage_fk_ticket_by_ticketId", '{{%ticket_messages}}', 'ticketId', "{{%tickets}}", 'id', 'CASCADE', 'CASCADE');
 
 
@@ -68,10 +58,8 @@ class m180326_075529_ticket_modules extends Migration
         $this->dropForeignKey("ticket_fk_ticketCategory_by_categoryId", '{{%tickets}}');
         $this->dropForeignKey("ticketMessage_fk_ticket_by_ticketId", '{{%ticket_messages}}');
 
-        $this->dropTable("{{%ticket_categories}}");
         $this->dropTable("{{%tickets}}");
         $this->dropTable("{{%ticket_messages}}");
-
 
     }
 }

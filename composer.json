@@ -14,13 +14,18 @@
     {
       "name": "Mohammad Parvane",
       "email": "mohammad.pvn1375@gmail.com"
+    },
+    {
+      "name": "Saghar Mojdehi",
+      "email": "saghar.mojdehi@gmail.com"
     }
   ],
   "require": {
     "php": ">=7.0",
     "yiisoft/yii2": "~2.0.11",
     "aminkt/yii2-alert-widget": "dev-master",
-    "aminkt/yii2-upload-manager" : "dev-master"
+    "aminkt/yii2-upload-manager": "dev-master",
+    "kartik-v/yii2-widget-select2": "@dev"
   },
   "autoload": {
     "psr-4": {
