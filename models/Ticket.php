@@ -5,6 +5,7 @@ namespace aminkt\ticket\models;
 use aminkt\ticket\interfaces\CustomerCareInterface;
 use aminkt\ticket\interfaces\CustomerInterface;
 use yii\behaviors\TimestampBehavior;
+use yii\data\ActiveDataProvider;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
 use aminkt\widgets\alert\Alert;
@@ -62,7 +63,7 @@ class Ticket extends ActiveRecord
      */
     public static function tableName()
     {
-        return "{{%tickets}}";
+        return '{{%tickets}}';
     }
 
     /**
@@ -105,6 +106,14 @@ class Ticket extends ActiveRecord
     public function getTicketMessages()
     {
         return $this->hasMany(TicketMessage::className(), ['ticketId' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDepartment()
+    {
+        return $this->hasOne(Department::class, ['id' => 'departmentId']);
     }
 
     /**
@@ -291,6 +300,58 @@ class Ticket extends ActiveRecord
             throw new \RuntimeException("Cant open ticket.");
         }
         return $this;
+    }
+
+    /**
+     * Get customer care tickets by department
+     *
+     * @param $userId
+     *
+     * @return ActiveDataProvider
+     *
+     * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
+     */
+    public static function getCustomerCareTickets($userId)
+    {
+        $query = Ticket::find();
+        $query->leftJoin(
+            '{{%ticket_user_departments}}',
+            '{{%tickets}}.departmentId = {{%ticket_user_departments}}.departmentId')
+            ->andWhere(['{{%ticket_user_departments}}.userId' => $userId]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query
+        ]);
+
+        return $dataProvider;
+    }
+
+    /**
+     * Returns status label
+     *
+     * @return string
+     *
+     * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
+     */
+    public function getStatusLabel()
+    {
+        switch ($this->status) {
+            case self::STATUS_NOT_REPLIED:
+                return 'بی پاسخ';
+                break;
+            case self::STATUS_REPLIED:
+                return 'پاسخ داده شده';
+                break;
+            case self::STATUS_CLOSED:
+                return 'بسته شده';
+                break;
+            case self::STATUS_BLOCKED:
+                return 'بن شده';
+                break;
+            default:
+                return "نامشخص";
+                break;
+        }
     }
 }
 
