@@ -1,5 +1,7 @@
 <?php
+
 namespace aminkt\ticket\models;
+
 use aminkt\ticket\interfaces\CustomerCareInterface;
 use aminkt\ticket\interfaces\CustomerInterface;
 use yii\behaviors\TimestampBehavior;
@@ -16,14 +18,13 @@ use aminkt\widgets\alert\Alert;
  * @property string $mobile
  * @property string $email
  * @property string $subject
- * @property int $categoryId
+ * @property int $departmentId
  * @property int $status
  * @property string $updateAt
  * @property string $createAt
  * @property string $trackingCode
  *
  * @property TicketMessage[] $ticketMessages
- * @property TicketCategory $category
  * @property string $userName
  * @property string $userEmail
  * @property \aminkt\ticket\interfaces\CustomerInterface $customer
@@ -71,11 +72,11 @@ class Ticket extends ActiveRecord
     {
         return [
             [['name', 'mobile', 'email', 'subject'], 'required'],
-            [['customerId', 'categoryId', 'status'], 'integer'],
+            [['customerId', 'status', 'departmentId'], 'integer'],
             [['updateAt', 'createAt'], 'safe'],
             [['name', 'email', 'subject'], 'string', 'max' => 191],
             [['mobile'], 'string', 'max' => 15],
-            [['categoryId'], 'exist', 'skipOnError' => true, 'targetClass' => TicketCategory::class, 'targetAttribute' => ['categoryId' => 'id']],
+            [['departmentId'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['departmentId' => 'id']],
         ];
     }
 
@@ -91,7 +92,7 @@ class Ticket extends ActiveRecord
             'mobile' => 'Mobile',
             'email' => 'Email',
             'subject' => 'Subject',
-            'categoryId' => 'Category ID',
+            'departmentId' => 'Department ID',
             'status' => 'Status',
             'updateAt' => 'Update At',
             'createAt' => 'Create At',
@@ -107,19 +108,11 @@ class Ticket extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getCategory()
-    {
-        return $this->hasOne(TicketCategory::className(), ['id' => 'categoryId']);
-    }
-
-    /**
      * Get ticket subject.
      *
      * @return string
      */
-    public function getSubject(): string
+    public function getSubject() : string
     {
         return $this->subject;
     }
@@ -129,7 +122,7 @@ class Ticket extends ActiveRecord
      *
      * @return string
      */
-    function getUserName(): string
+    function getUserName() : string
     {
         return $this->name;
     }
@@ -139,7 +132,7 @@ class Ticket extends ActiveRecord
      *
      * @return string
      */
-    function getUserMobile(): string
+    function getUserMobile() : string
     {
         return $this->mobile;
 
@@ -150,7 +143,7 @@ class Ticket extends ActiveRecord
      *
      * @return string
      */
-    function getUserEmail(): string
+    function getUserEmail() : string
     {
         return $this->email;
 
@@ -160,8 +153,7 @@ class Ticket extends ActiveRecord
      * Return true if customer model not available and false if available.
      * @return bool
      */
-    function isGuestTicket(): bool
-    {
+    function isGuestTicket() : bool {
         return $this->customerId ? false : true;
     }
 
@@ -170,26 +162,25 @@ class Ticket extends ActiveRecord
      *
      * @return CustomerInterface
      */
-    function getCustomer(): CustomerInterface
-    {
-        if ($this->isGuestTicket()) {
+    function getCustomer() : CustomerInterface {
+        if($this->isGuestTicket()){
             return new CustomerTempModel(
-                $this->getUserName(),
-                $this->getUserEmail(),
-                $this->getUserMobile()
+              $this->getUserName(),
+              $this->getUserEmail(),
+              $this->getUserMobile()
             );
-        } else {
+        }else{
             // todo should return user model.
             return null;
         }
     }
 
     /**
-     * create new ticket
+     * Create new ticket.
      *
      * @param string $subject
      * @param CustomerInterface $customer
-     * @param TicketCategory $category
+     * @param Department $department
      *
      * @return Ticket
      *
