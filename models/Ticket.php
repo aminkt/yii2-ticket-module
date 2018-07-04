@@ -4,11 +4,12 @@ namespace aminkt\ticket\models;
 
 use aminkt\ticket\interfaces\CustomerCareInterface;
 use aminkt\ticket\interfaces\CustomerInterface;
+use aminkt\widgets\alert\Alert;
+use Imagine\Exception\RuntimeException;
 use yii\behaviors\TimestampBehavior;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
-use aminkt\widgets\alert\Alert;
 
 /**
  * This is the model class for table "tickets".
@@ -29,6 +30,8 @@ use aminkt\widgets\alert\Alert;
  * @property string $userName
  * @property string $userEmail
  * @property \aminkt\ticket\interfaces\CustomerInterface $customer
+ * @property string $statusLabel
+ * @property \yii\db\ActiveQuery $department
  * @property string $userMobile
  *
  * @package aminkt\ticket
@@ -63,7 +66,7 @@ class Ticket extends ActiveRecord
      */
     public static function tableName()
     {
-        return '{{%tickets}}';
+        return "{{%tickets}}";
     }
 
     /**
@@ -87,16 +90,17 @@ class Ticket extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'name' => 'Name',
-            'customerId' => 'Customer ID',
-            'mobile' => 'Mobile',
-            'email' => 'Email',
-            'subject' => 'Subject',
-            'departmentId' => 'Department ID',
-            'status' => 'Status',
-            'updateAt' => 'Update At',
-            'createAt' => 'Create At',
+            'id' => 'شماره شناسه',
+            'name' => 'نام',
+            'customerId' => 'کاربر',
+            'mobile' => 'موبایل',
+            'email' => 'ایمیل',
+            'subject' => 'موضوع',
+            'departmentId' => 'دپارتمان',
+            'status' => 'موقعیت',
+            'updateAt' => 'تاریخ ویرایش',
+            'createAt' => 'تاریخ ایجاد',
+            'userName' => 'نام کاربر',
         ];
     }
 
@@ -160,6 +164,7 @@ class Ticket extends ActiveRecord
 
     /**
      * Return true if customer model not available and false if available.
+     *
      * @return bool
      */
     function isGuestTicket() : bool {
@@ -195,14 +200,14 @@ class Ticket extends ActiveRecord
      *
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      */
-    public static function createNewTicket(string $subject, CustomerInterface $customer, TicketCategory $category): self
+    public static function createNewTicket(string $subject, CustomerInterface $customer, Department $department): self
     {
         $ticket = new Ticket();
         $ticket->name = $customer->getName();
         $ticket->mobile = $customer->getMobile();
         $ticket->email = $customer->getEmail();
         $ticket->customerId = $customer->getId();
-        $ticket->categoryId = $category->id;
+        $ticket->departmentId = $department->id;
         $ticket->subject = $subject;
         $ticket->trackingCode = $ticket->generateTrackingCode();
         $ticket->status = self::STATUS_NOT_REPLIED;
@@ -233,6 +238,7 @@ class Ticket extends ActiveRecord
      * create random characters for tracking code
      *
      * @param int $length
+     *
      * @return string
      *
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
@@ -264,7 +270,6 @@ class Ticket extends ActiveRecord
     public function sendNewMessage(string $message, string $attachments, CustomerCareInterface $customerCare = null): TicketMessage
     {
         $message = TicketMessage::sendNewMessage($this->id, $message, $attachments, $customerCare);
-        // todo : Should implement.
         return $message;
     }
 
@@ -353,10 +358,29 @@ class Ticket extends ActiveRecord
                 break;
         }
     }
+
+    /**
+     * Set ticket status
+     *
+     * @param $status
+     *
+     * @return $this
+     *
+     * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
+     */
+    public function setStatus($status)
+    {
+        $this->status = $status;
+        if (!$this->save()) {
+            throw new RuntimeException('Status did not change');
+        }
+        return $this;
+    }
 }
 
 /**
  * Class CustomerTempModel  for guest customers
+ *
  * @package aminkt\ticket\models
  */
 class CustomerTempModel implements CustomerInterface
@@ -395,6 +419,7 @@ class CustomerTempModel implements CustomerInterface
 
     /**
      * Return user email.
+     *
      * @return string|null
      */
     function getEmail()

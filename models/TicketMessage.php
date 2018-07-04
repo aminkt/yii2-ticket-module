@@ -1,10 +1,14 @@
 <?php
+
 namespace aminkt\ticket\models;
+
 use aminkt\ticket\interfaces\CustomerCareInterface;
 use aminkt\ticket\interfaces\CustomerInterface;
+use aminkt\uploadManager\UploadManager;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
+use yii\web\NotFoundHttpException;
 
 /**
  * This is the model class for table "ticket_messages".
@@ -57,7 +61,6 @@ class TicketMessage extends ActiveRecord
         return [
             [['message'], 'string'],
             [['ticketId', 'customerCareId'], 'integer'],
-            [['attachments'], 'required'],
             [['updateAt', 'createAt'], 'safe'],
             [['attachments'], 'string', 'max' => 191],
             [['ticketId'], 'exist', 'skipOnError' => true, 'targetClass' => Ticket::class, 'targetAttribute' => ['ticketId' => 'id']],
@@ -71,12 +74,12 @@ class TicketMessage extends ActiveRecord
     {
         return [
             'id' => 'ID',
-            'message' => 'Message',
-            'ticketId' => 'Ticket ID',
-            'attachments' => 'Attachments',
+            'message' => 'متن پیام',
+            'ticketId' => 'شناسه تیکت',
+            'attachments' => 'پیوست ها',
             'customerCareId' => 'Customer Care ID',
-            'updateAt' => 'Update At',
-            'createAt' => 'Create At',
+            'updateAt' => 'تاریخ ویرایش',
+            'createAt' => 'تاریخ ایجاد',
         ];
     }
 
@@ -85,7 +88,7 @@ class TicketMessage extends ActiveRecord
      */
     public function getTicket()
     {
-        return $this->hasOne(Ticket::className(), ['id' => 'ticketId']);
+        return $this->hasOne(Ticket::class, ['id' => 'ticketId']);
     }
 
     /**
@@ -101,13 +104,39 @@ class TicketMessage extends ActiveRecord
     /**
      * Return attachments models.
      *
-     * @return string
+     * @return array
      *
-     * todo : Change return type to upload manager files.
+     * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
      */
     public function getAttachments()
     {
-        return $this->attachments;
+        $items = explode(',', $this->attachments);
+        $attachments = [];
+        foreach ($items as $item) {
+            try {
+                $attachments[] = UploadManager::getInstance()->getFile($item);
+            } catch (NotFoundHttpException $e) {
+                \Yii::error("File not found.");
+            }
+        }
+        return $attachments;
+    }
+
+    /**
+     * Return attachments url
+     *
+     * @return array
+     *
+     * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
+     */
+    public function getAttachmentUrl()
+    {
+        $urls = [];
+        foreach ($this->getAttachments() as $attachment) {
+            $urls[] = $attachment->getUrl();
+        }
+
+        return $urls;
     }
 
     /**
@@ -115,14 +144,15 @@ class TicketMessage extends ActiveRecord
      *
      * @return CustomerCareInterface|CustomerInterface
      *
-     * todo : should implement.
+     * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
      */
     public function getUser()
     {
-        if($this->isCustomerCareReply()){
-            // todo : Should return customer care user model.
-            return null;
-        }else{
+        if ($this->isCustomerCareReply()) {
+            $adminModel = \aminkt\ticket\Ticket::getInstance()->adminModel;
+            $customerCare = $adminModel::findOne($this->customerCareId);
+            return $customerCare;
+        } else {
             return $this->ticket->customer;
         }
     }
@@ -132,8 +162,9 @@ class TicketMessage extends ActiveRecord
      *
      * @return bool
      */
-    public function isCustomerCareReply() : bool {
-        return $this->customerCareId?true:false;
+    public function isCustomerCareReply(): bool
+    {
+        return $this->customerCareId ? true : false;
     }
 
     /**
@@ -150,7 +181,8 @@ class TicketMessage extends ActiveRecord
      *
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      */
-    public static function sendNewMessage(int $id, string $message, string $attachments, CustomerCareInterface $customerCare=null) : self {
+    public static function sendNewMessage(int $id, string $message, string $attachments, CustomerCareInterface $customerCare = null): self
+    {
         $ticketMessage = new TicketMessage();
         $ticketMessage->ticketId = $id;
         $ticketMessage->message = $message;

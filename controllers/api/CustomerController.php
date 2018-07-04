@@ -1,12 +1,11 @@
 <?php
 namespace aminkt\ticket\controllers\front;
-use aminkt\ticket\models\CustomerTempModel;
-use aminkt\ticket\models\TicketCategory;
+
 use aminkt\ticket\models\Ticket;
-use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
 use yii\filters\auth\HttpBearerAuth;
 use aminkt\widgets\alert\Alert;
+
 /**
  * Class CustomerController
  *
@@ -59,5 +58,19 @@ class CustomerController extends \yii\rest\Controller
         $customer = \Yii::$app->getUser()->getIdentity();
         $ticketList = Ticket::find()->where('customerId' == $customer->getId())->all();
         return $ticketList;
+    }
+
+    /**
+     * return ticket with it's messages by ticket trackingCode
+     *
+     * @return Ticket
+     *
+     * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
+     */
+    public function actionView()
+    {
+        $trackingCode = \Yii::$app->getRequest()->get('trackingCode');
+        $ticket = Ticket::findOne(['trackingCode' => $trackingCode]);
+        return $ticket;
     }
 }
