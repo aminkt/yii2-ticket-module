@@ -1,7 +1,9 @@
 <?php
 
+namespace aminkt\ticket\interfaces;
 
-interface CustomerInterface extends BaseTicketUsetInterface
+
+interface CustomerInterface extends BaseTicketUserInterface
 {
 
 

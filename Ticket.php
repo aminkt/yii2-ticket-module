@@ -1,6 +1,6 @@
 <?php
 
-namespace api\modules\ticket;
+namespace aminkt\ticket;
 
 use aminkt\ticket\interfaces\CustomerCareInterface;
 use aminkt\ticket\interfaces\CustomerInterface;
