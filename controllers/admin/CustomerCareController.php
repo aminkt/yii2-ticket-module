@@ -1,7 +1,6 @@
 <?php
 
 namespace aminkt\ticket\controllers\admin;
-use aminkt\ticket\Ticket;
 
 use aminkt\ticket\models\Department;
 use aminkt\ticket\models\Ticket;
@@ -13,6 +12,7 @@ use Imagine\Exception\RuntimeException;
 use yii\data\ActiveDataProvider;
 use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
+use yii\helpers\FileHelper;
 use yii\web\Controller;
 
 /**
@@ -22,7 +22,6 @@ use yii\web\Controller;
  */
 class CustomerCareController extends Controller
 {
-
     /**
      * @inheritdoc
      */
@@ -40,6 +39,13 @@ class CustomerCareController extends Controller
                 ],
             ],
         ];
+    }
+
+    public function getViewPath()
+    {
+        $view = parent::getViewPath();
+        $view = FileHelper::normalizePath($view.'/../admin/customer-care');
+        return $view;
     }
 
     /**
@@ -261,8 +267,4 @@ class CustomerCareController extends Controller
             'userDepartmentForm' => $userDepartmentFrom
         ]);
     }
-
-
-    
-
 }

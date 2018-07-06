@@ -13,13 +13,15 @@ class Ticket extends \yii\base\Module
     /**
      * @inheritdoc
      */
-    public $controllerNamespace = 'aminkt\ticket\controllers';
+    public $controllerNamespace = 'aminkt\ticket\controllers\api';
 
     /** @var CustomerCareInterface Admin model */
     public $adminModel;
 
     /** @var CustomerInterface user model */
     public $userModel;
+
+    public $defaultRoute = 'customer-care/index';
 
     /**
      * @inheritdoc
