@@ -65,7 +65,7 @@ $this->title = 'مدیریت تیکت ها';
                             ],
                             'urlCreator' => function ($action, $model, $key, $index) {
                                 if ($action === 'view') {
-                                    return \yii\helpers\Url::to(['/ticket/admin/customer-care/ticket', 'id' => $model->id]);
+                                    return \yii\helpers\Url::to(['/ticket/customer-care/ticket', 'id' => $model->id]);
                                 }
                             }
                         ],

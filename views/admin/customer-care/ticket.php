@@ -10,33 +10,60 @@ $departments = \yii\helpers\ArrayHelper::map($departments, 'id', 'name');
 <div class="ticket-details">
     <div class="container-fluid">
         <div class="col col-md-8">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title"> پاسخ</h3>
-                </div>
-                <div class="panel-body">
-                    <div class="form-group">
-                        <?php $form = yii\widgets\ActiveForm::begin(['method' => 'post']); ?>
-                        <?= $form->field($model, 'message')->textarea(['rows' => 4, 'maxlength' => true]); ?>
-                        <div class="form-group attachment-input">
-                            <?php echo \aminkt\uploadManager\components\UploadManager::widget([
-                                'id' => 'ticket-attachment',
-                                'model' => $model,
-                                'attribute' => 'attachments',
-                                'mediaType' => \aminkt\uploadManager\models\UploadmanagerFiles::FILE_TYPE_IMAGE,
-                                'multiple' => true,
-                                'titleTxt' => 'تصویر را وارد کنید.',
-                                'helpBlockEnable' => false,
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title"> پاسخ</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <?php $form = yii\widgets\ActiveForm::begin(['method' => 'post']); ?>
+                                <?= $form->field($model, 'message')->textarea(['rows' => 4, 'maxlength' => true]); ?>
+                                <div class="form-group attachment-input">
+                                    <?php echo \aminkt\uploadManager\components\UploadManager::widget([
+                                        'id' => 'ticket-attachment',
+                                        'model' => $model,
+                                        'attribute' => 'attachments',
+                                        'mediaType' => \aminkt\uploadManager\models\UploadmanagerFiles::FILE_TYPE_IMAGE,
+                                        'multiple' => true,
+                                        'titleTxt' => 'تصویر را وارد کنید.',
+                                        'helpBlockEnable' => false,
 //                                'showImageContainer' => '#attachment',
 //                                'showImagesTemplate' => "<img src='{url}' class='img-responsive'>",
-                                'btnTxt' => 'جایگذاری پیوست'
-                            ]);
-                            ?>
-                            <!--                            <div id="attachment"></div>-->
+                                        'btnTxt' => 'جایگذاری پیوست'
+                                    ]);
+                                    ?>
+                                    <!--                            <div id="attachment"></div>-->
+                                </div>
+                                <div class="form-group ">
+                                    <?= yii\helpers\Html::submitButton('ارسال', ['class' => 'btn btn-success save-post-btn', 'style' => 'float: left;']); ?>
+                                    <?php \yii\widgets\ActiveForm::end(); ?>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group ">
-                            <?= yii\helpers\Html::submitButton('ارسال', ['class' => 'btn btn-success save-post-btn', 'style' => 'float: left;']); ?>
-                            <?php \yii\widgets\ActiveForm::end(); ?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title"> پیام ها</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <div class="col-md-8"
+                                <?= \yii\widgets\ListView::widget([
+                                    'dataProvider' => $dataProvider,
+                                    'itemOptions' => ['class' => 'item'],
+                                    'itemView' => function ($model, $key, $index, $widget) {
+                                        return $this->render('_list_item', ['model' => $model]);
+                                    }
+                                ]);
+                                ?>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -51,12 +78,9 @@ $departments = \yii\helpers\ArrayHelper::map($departments, 'id', 'name');
                     <div class="form-group">
                         <?php $form = yii\widgets\ActiveForm::begin(['method' => 'post']); ?>
                         <?= $form->field($ticket, 'subject')->textInput(['readonly' => true]) ?>
-                        <?= $form->field($ticket, 'name')->textInput(['readonly' => true]) ?>
                         <?= $form->field($ticket, 'userName')->textInput(['readonly' => true]) ?>
-                        <?= $form->field($ticket, 'mobile')->textInput(['readonly' => true]) ?>
-                        <?= $form->field($ticket, 'email')->textInput(['readonly' => true]) ?>
-                        <?= $form->field($ticket, 'createAt')->textInput(['readonly' => true]) ?>
-                        <?= $form->field($ticket, 'updateAt')->textInput(['readonly' => true]) ?>
+                        <?= $form->field($ticket, 'userMobile')->textInput(['readonly' => true]) ?>
+                        <?= $form->field($ticket, 'userEmail')->textInput(['readonly' => true]) ?>
                         <?= $form->field($ticket, 'departmentId')->widget(\kartik\select2\Select2::class, [
                             'data' => $departments,
                             'options' => ['placeholder' => 'دپارتمان را انتخاب کنید ...'],
@@ -70,31 +94,14 @@ $departments = \yii\helpers\ArrayHelper::map($departments, 'id', 'name');
                             \aminkt\ticket\models\Ticket::STATUS_CLOSED => 'بسته شده',
                             \aminkt\ticket\models\Ticket::STATUS_BLOCKED => 'بن شده',
                         ])->label('وضعیت') ?>
+                        <div class="row">
+                            <div class="col-md-6">تاریخ ایجاد: <?= Yii::$app->getFormatter()->asDatetime($ticket->createAt) ?></div>
+                            <div class="col-md-6">تاریخ ویرایش: <?= Yii::$app->getFormatter()->asDatetime($ticket->updateAt) ?></div>
+                        </div>
+                        <br>
+
                         <?= yii\helpers\Html::submitButton('ذخیره', ['class' => 'btn btn-success save-post-btn', 'style' => 'float: left;']) ?>
                         <?php \yii\widgets\ActiveForm::end(); ?>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!--    </div>-->
-        <!--    <div class="container-fluid">-->
-        <div class="col col-md-8">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title"> پیام ها</h3>
-                </div>
-                <div class="panel-body">
-                    <div class="form-group">
-                        <div class="col-md-8"
-                        <?= \yii\widgets\ListView::widget([
-                            'dataProvider' => $dataProvider,
-                            'itemOptions' => ['class' => 'item'],
-                            'itemView' => function ($model, $key, $index, $widget) {
-                                return $this->render('_list_item', ['model' => $model]);
-                            }
-                        ]);
-                        ?>
                     </div>
                 </div>
             </div>

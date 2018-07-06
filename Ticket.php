@@ -36,7 +36,7 @@ class Ticket extends \yii\base\Module
      *
      * @author Amin Keshavarz <amin@keshavarz.pro>
      */
-    public static function getInstance()
+    public static function getInstance() : self
     {
         if (parent::getInstance())
             return parent::getInstance();

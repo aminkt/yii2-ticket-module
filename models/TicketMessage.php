@@ -8,6 +8,7 @@ use aminkt\uploadManager\UploadManager;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
+use yii\helpers\Html;
 use yii\web\NotFoundHttpException;
 
 /**
@@ -172,7 +173,7 @@ class TicketMessage extends ActiveRecord
      *
      * @param integer $id
      * @param string $message
-     * @param string $attachments
+     * @param array $attachments
      * @param CustomerCareInterface|null $customerCare
      *
      * @throws \RuntimeException    When cant create ticket.
@@ -181,15 +182,14 @@ class TicketMessage extends ActiveRecord
      *
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      */
-    public static function sendNewMessage(int $id, string $message, string $attachments, CustomerCareInterface $customerCare = null): self
+    public static function sendNewMessage(int $id, string $message, array $attachments, CustomerCareInterface $customerCare = null): self
     {
         $ticketMessage = new TicketMessage();
         $ticketMessage->ticketId = $id;
-        $ticketMessage->message = $message;
-        $ticketMessage->attachments = $attachments;
+        $ticketMessage->message = Html::encode($message);
+        $ticketMessage->attachments = implode(',', $attachments);
         if ($customerCare)
             $ticketMessage->customerCareId = $customerCare->getId();
-        $ticketMessage->save();
         return $ticketMessage;
     }
 }

@@ -34,7 +34,6 @@ interface BaseTicketUserInterface
      */
     function getEmail();
 
-
     /**
      * Return user mobile.
      * 

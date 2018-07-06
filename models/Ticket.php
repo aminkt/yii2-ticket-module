@@ -43,6 +43,9 @@ class Ticket extends ActiveRecord
     const STATUS_CLOSED = 3;
     const STATUS_BLOCKED = 4;
 
+    private $customerModel;
+    private $customerCareModel;
+
     /**
      * @inheritdoc
      */
@@ -75,7 +78,10 @@ class Ticket extends ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'mobile', 'email', 'subject'], 'required'],
+            [['subject'], 'required'],
+            [['name', 'mobile', 'email'], 'required', 'when' => function ($model) {
+                return !$model->customerId;
+            }],
             [['customerId', 'status', 'departmentId'], 'integer'],
             [['updateAt', 'createAt'], 'safe'],
             [['name', 'email', 'subject'], 'string', 'max' => 191],
@@ -109,7 +115,7 @@ class Ticket extends ActiveRecord
      */
     public function getTicketMessages()
     {
-        return $this->hasMany(TicketMessage::className(), ['ticketId' => 'id']);
+        return $this->hasMany(TicketMessage::className(), ['ticketId' => 'id'])->orderBy(['updateAt' => SORT_DESC]);
     }
 
     /**
@@ -137,7 +143,10 @@ class Ticket extends ActiveRecord
      */
     function getUserName() : string
     {
-        return $this->name;
+        $user = $this->getCustomer();
+        if($user){
+            return $user->getName();
+        }
     }
 
     /**
@@ -147,8 +156,10 @@ class Ticket extends ActiveRecord
      */
     function getUserMobile() : string
     {
-        return $this->mobile;
-
+        $user = $this->getCustomer();
+        if($user){
+            return $user->getMobile();
+        }
     }
 
     /**
@@ -158,8 +169,10 @@ class Ticket extends ActiveRecord
      */
     function getUserEmail() : string
     {
-        return $this->email;
-
+        $user = $this->getCustomer();
+        if($user){
+            return $user->getEmail();
+        }
     }
 
     /**
@@ -178,15 +191,55 @@ class Ticket extends ActiveRecord
      */
     function getCustomer() : CustomerInterface {
         if($this->isGuestTicket()){
-            return new CustomerTempModel(
-              $this->getUserName(),
-              $this->getUserEmail(),
-              $this->getUserMobile()
-            );
+            $customer = new class implements CustomerInterface {
+                public $name;
+                public $email;
+                public $mobile;
+                /**
+                 * Return User Id.
+                 *
+                 * @return integer
+                 */
+                function getId(){
+                    return null;
+                }
+
+                /**
+                 * Return user full name.
+                 *
+                 * @return string
+                 */
+                function getName(){
+                    return $this->name;
+                }
+
+                /**
+                 * Return user email.
+                 * @return string|null
+                 */
+                function getEmail(){
+                    return $this->email;
+                }
+
+                /**
+                 * Return user mobile.
+                 *
+                 * @return string|null
+                 */
+                function getMobile(){
+                    return $this->mobile;
+                }
+            };
+            $customer->name = $this->name;
+            $customer->email = $this->email;
+            $customer->mobile = $this->mobile;
+            return $customer;
         }else{
-            // todo should return user model.
-            return null;
+            $modelClass = \aminkt\ticket\Ticket::getInstance()->userModel;
+            $this->customerModel = $modelClass::findOne($this->customerId);
         }
+
+        return $this->customerModel;
     }
 
     /**
@@ -203,21 +256,18 @@ class Ticket extends ActiveRecord
     public static function createNewTicket(string $subject, CustomerInterface $customer, Department $department): self
     {
         $ticket = new Ticket();
-        $ticket->name = $customer->getName();
-        $ticket->mobile = $customer->getMobile();
-        $ticket->email = $customer->getEmail();
-        $ticket->customerId = $customer->getId();
+        if($customer->getId()){
+            $ticket->customerId = $customer->getId();
+        }else{
+            $ticket->name = $customer->getName();
+            $ticket->mobile = $customer->getMobile();
+            $ticket->email = $customer->getEmail();
+        }
         $ticket->departmentId = $department->id;
         $ticket->subject = $subject;
         $ticket->trackingCode = $ticket->generateTrackingCode();
         $ticket->status = self::STATUS_NOT_REPLIED;
-        if ($ticket->save()) {
-            Alert::success('تیکت با موفقیت ایجاد شد', 'اسم تیکت جدید : ' . $ticket->name);
-            return $ticket;
-        } else {
-            \Yii::error($ticket->getErrors());
-            throw new \RuntimeException('تیکت ذخیره نشد.');
-        }
+        return $ticket;
     }
 
     /**
@@ -258,7 +308,7 @@ class Ticket extends ActiveRecord
      * Send new message to current ticket.
      *
      * @param string $message
-     * @param string $attachments
+     * @param array $attachments
      * @param CustomerCareInterface|null $customerCare
      *
      * @throws \RuntimeException    When cant create ticket.
@@ -267,7 +317,7 @@ class Ticket extends ActiveRecord
      *
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      */
-    public function sendNewMessage(string $message, string $attachments, CustomerCareInterface $customerCare = null): TicketMessage
+    public function sendNewMessage(string $message, array $attachments, CustomerCareInterface $customerCare = null): TicketMessage
     {
         $message = TicketMessage::sendNewMessage($this->id, $message, $attachments, $customerCare);
         return $message;
@@ -375,65 +425,5 @@ class Ticket extends ActiveRecord
             throw new RuntimeException('Status did not change');
         }
         return $this;
-    }
-}
-
-/**
- * Class CustomerTempModel  for guest customers
- *
- * @package aminkt\ticket\models
- */
-class CustomerTempModel implements CustomerInterface
-{
-    public $id = null;
-    public $name;
-    public $email;
-    public $mobile;
-
-    function __construct(string $name, string $email = null, string $mobile = null)
-    {
-        $this->name = $name;
-        $this->email = $email;
-        $this->mobile = $mobile;
-    }
-
-    /**
-     * Return User Id.
-     *
-     * @return integer
-     */
-    function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * Return user full name.
-     *
-     * @return string
-     */
-    function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Return user email.
-     *
-     * @return string|null
-     */
-    function getEmail()
-    {
-        return $this->email;
-    }
-
-    /**
-     * Return user mobile.
-     *
-     * @return string|null
-     */
-    function getMobile()
-    {
-        return $this->mobile;
     }
 }

@@ -127,7 +127,7 @@ class CustomerCareController extends Controller
         }
 
         $dataProvider = new ActiveDataProvider([
-            'query' => TicketMessage::find()->where(['ticketId' => $ticket->id])
+            'query' => $ticket->getTicketMessages()
         ]);
 
         $model = new TicketMessage();
@@ -136,9 +136,13 @@ class CustomerCareController extends Controller
 
             if ($model->load(\Yii::$app->getRequest()->post())) {
                 try {
-                    $ticket->sendNewMessage($model->getMessage(), $model->attachments, \Yii::$app->getUser()->getIdentity());
+                    $attachments = explode(',', $model->attachments);
+                    $model = $ticket->sendNewMessage($model->getMessage(), $attachments, \Yii::$app->getUser()->getIdentity());
                     try {
+                        $model->save();
                         $ticket->setStatus($ticket::STATUS_REPLIED);
+                        Alert::success('عملیات با موفقیت انجام شد', 'پیام با موفقیت ارسال شد.');
+                        return $this->redirect(['ticket', 'id' => $id]);
                     } catch (RuntimeException $e) {
                         Alert::error('خطا', 'وضعیت تیکت ویرایش نشد');
                         return $this->redirect(['ticket', 'id' => $id]);
@@ -155,11 +159,11 @@ class CustomerCareController extends Controller
                 if (!$ticket->save()) {
                     Alert::error('خطا', 'تغییرات ذخیره نشد');
                     return $this->redirect(['ticket', 'id' => $id]);
+                }else{
+                    Alert::success('عملیات با موفقیت انجام شد', 'مشخصات تیکت با موفقیت ویرایش شد.');
+                    return $this->redirect(['ticket', 'id' => $id]);
                 }
             }
-
-            Alert::success('عملیات با موفقیت انجام شد', '');
-            return $this->redirect(['ticket', 'id' => $id]);
         }
 
 
