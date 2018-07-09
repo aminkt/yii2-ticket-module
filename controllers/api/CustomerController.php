@@ -1,4 +1,5 @@
 <?php
+
 namespace aminkt\ticket\controllers\api;
 
 use aminkt\ticket\interfaces\CustomerInterface;
@@ -153,8 +154,6 @@ class CustomerController extends \yii\rest\ActiveController
     /**
      * Return user tickets List
      *
-     * @param string|null $trackingCode
-     *
      * @return array|\yii\db\ActiveRecord[]
      *
      * @throws \Exception
@@ -163,11 +162,24 @@ class CustomerController extends \yii\rest\ActiveController
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      * @author Amin Keshavarz <ak_1596@yahoo.com>
      */
-    public function actionIndex($trackingCode=null)
+    public function actionIndex()
     {
+        $this->checkAccess($this->action->id);
         $customer = \Yii::$app->getUser()->getIdentity();
         $ticketList = Ticket::find()->where(['customerId' => $customer->getId()])->all();
         return $ticketList;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function checkAccess($action, $model = null, $params = [])
+    {
+        if($action == 'index'){
+            if(!\Yii::$app->getUser()->getIdentity()){
+                throw new ForbiddenHttpException("Your access denied.");
+            }
+        }
     }
 
     /**
