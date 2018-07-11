@@ -409,6 +409,13 @@ class Ticket extends ActiveRecord
         }
     }
 
+    public function fields()
+    {
+        $fields = parent::fields();
+
+        return array_merge($fields, ['statusLabel']);
+    }
+
     /**
      * Set ticket status
      *
