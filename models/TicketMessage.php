@@ -149,10 +149,44 @@ class TicketMessage extends ActiveRecord
      */
     public function getUser()
     {
-        if ($this->isCustomerCareReply()) {
+        if ($this->getIsCustomerCareReply()) {
             $adminModel = \aminkt\ticket\Ticket::getInstance()->adminModel;
             $customerCare = $adminModel::findOne($this->customerCareId);
-            return $customerCare;
+            $customerCareReturn = new class implements CustomerInterface {
+                public $id;
+                public $name;
+
+                /**
+                 * Return User Id.
+                 *
+                 * @return integer
+                 */
+                function getId(){
+                    return $this->id;
+                }
+
+                /**
+                 * Return user full name.
+                 *
+                 * @return string
+                 */
+                function getName(){
+                    return $this->name;
+                }
+
+                function getMobile()
+                {
+                    return null;
+                }
+
+                public function getEmail()
+                {
+                    return null;
+                }
+            };
+            $customerCareReturn->name = $customerCare->fullName;
+            $customerCareReturn->id = $customerCare->id;
+            return $customerCareReturn;
         } else {
             return $this->ticket->customer;
         }
@@ -163,7 +197,7 @@ class TicketMessage extends ActiveRecord
      *
      * @return bool
      */
-    public function isCustomerCareReply(): bool
+    public function getIsCustomerCareReply(): bool
     {
         return $this->customerCareId ? true : false;
     }
@@ -191,5 +225,14 @@ class TicketMessage extends ActiveRecord
         if ($customerCare)
             $ticketMessage->customerCareId = $customerCare->getId();
         return $ticketMessage;
+    }
+
+    public function fields()
+    {
+        $fields =  parent::fields();
+
+        unset($fields['customerCareId'], $fields['ticketId']);
+
+        return array_merge($fields, ['isCustomerCareReply', 'user']);
     }
 }

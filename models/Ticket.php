@@ -180,7 +180,7 @@ class Ticket extends ActiveRecord
      *
      * @return bool
      */
-    function isGuestTicket() : bool {
+    function getIsGuestTicket() : bool {
         return $this->customerId ? false : true;
     }
 
@@ -190,7 +190,7 @@ class Ticket extends ActiveRecord
      * @return CustomerInterface
      */
     function getCustomer() : CustomerInterface {
-        if($this->isGuestTicket()){
+        if($this->getIsGuestTicket()){
             $customer = new class implements CustomerInterface {
                 public $name;
                 public $email;
@@ -413,7 +413,9 @@ class Ticket extends ActiveRecord
     {
         $fields = parent::fields();
 
-        return array_merge($fields, ['statusLabel']);
+        unset($fields['customerId'], $fields['name'], $fields['family'], $fields['mobile'], $fields['email']);
+
+        return array_merge($fields, ['statusLabel', 'isGuestTicket', 'customer']);
     }
 
     /**
