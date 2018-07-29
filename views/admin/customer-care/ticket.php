@@ -54,7 +54,7 @@ $departments = \yii\helpers\ArrayHelper::map($departments, 'id', 'name');
                         </div>
                         <div class="panel-body">
                             <div class="form-group">
-                                <div class="col-md-8"
+                                <div class="col-md-12"
                                 <?= \yii\widgets\ListView::widget([
                                     'dataProvider' => $dataProvider,
                                     'itemOptions' => ['class' => 'item'],
