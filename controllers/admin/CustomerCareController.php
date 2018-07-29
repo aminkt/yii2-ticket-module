@@ -1,6 +1,7 @@
 <?php
 
 namespace aminkt\ticket\controllers\admin;
+use aminkt\ticket\components\TicketEvent;
 
 use aminkt\ticket\models\Department;
 use aminkt\ticket\models\Ticket;
@@ -14,7 +15,7 @@ use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
 use yii\helpers\FileHelper;
 use yii\web\Controller;
-
+use yii\base\Event;
 /**
  * Class CustomerCareController
  *
@@ -141,6 +142,16 @@ class CustomerCareController extends Controller
                     try {
                         $model->save();
                         $ticket->setStatus($ticket::STATUS_REPLIED);
+
+                        $event = new TicketEvent([
+                            'userName' => $model->getUser()->getName(),
+                            'userMobile' => $model->getUser()->getMobile(),
+                            'userEmail' => $model->getUser()->getEmail(),
+                            'status' => $ticket->status,
+                            'ticketSubject' => $ticket->subject
+                        ]);
+                        \Yii::$app->trigger(\aminkt\ticket\Ticket::EVENT_ON_REPLY, $event);
+
                         Alert::success('عملیات با موفقیت انجام شد', 'پیام با موفقیت ارسال شد.');
                         return $this->redirect(['ticket', 'id' => $id]);
                     } catch (RuntimeException $e) {
