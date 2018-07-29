@@ -1,6 +1,7 @@
 <?php
 
 namespace aminkt\ticket\controllers\admin;
+use aminkt\ticket\components\TicketEvent;
 use aminkt\ticket\Ticket;
 
 use aminkt\ticket\models\Department;
@@ -14,7 +15,7 @@ use yii\data\ActiveDataProvider;
 use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
 use yii\web\Controller;
-
+use yii\base\Event;
 /**
  * Class CustomerCareController
  *
@@ -153,6 +154,12 @@ class CustomerCareController extends Controller
             }
 
             Alert::success('عملیات با موفقیت انجام شد', '');
+            $event = new TicketEvent();
+            $event->setUserName($ticket->getUserName());
+            $event->setUserMobile($ticket->getUserMobile());
+            $event->setUserEmail($ticket->getUserEmail());
+            $event->setTicketSubject($ticket->getSubject());
+            \Yii::$app->trigger(\aminkt\ticket\Ticket::EVENT_ON_REPLY, new Event(['sender' => $event]));
             return $this->redirect(['ticket', 'id' => $id]);
         }
 

@@ -21,6 +21,9 @@ class Ticket extends \yii\base\Module
     /** @var CustomerInterface user model */
     public $userModel;
 
+    /** event for send message */
+    const EVENT_ON_REPLY = 'eventTicketReply';
+
     /**
      * @inheritdoc
      */
