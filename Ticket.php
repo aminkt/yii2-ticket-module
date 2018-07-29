@@ -23,6 +23,9 @@ class Ticket extends \yii\base\Module
 
     public $defaultRoute = 'customer-care/index';
 
+    /** event for send message */
+    const EVENT_ON_REPLY = 'eventTicketReply';
+
     /**
      * @inheritdoc
      */
