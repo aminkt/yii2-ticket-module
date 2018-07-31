@@ -144,13 +144,14 @@ class CustomerCareController extends Controller
                         $ticket->setStatus($ticket::STATUS_REPLIED);
 
                         $event = new TicketEvent([
-                            'userName' => $model->getUser()->getName(),
-                            'userMobile' => $model->getUser()->getMobile(),
-                            'userEmail' => $model->getUser()->getEmail(),
+                            'userName' => $ticket->getCustomer()->getName(),
+                            'userMobile' => $ticket->getCustomer()->getMobile(),
+                            'userEmail' => $ticket->getCustomer()->getEmail(),
                             'status' => $ticket->status,
                             'ticketSubject' => $ticket->subject
                         ]);
-                        \Yii::$app->trigger(\aminkt\ticket\Ticket::EVENT_ON_REPLY, $event);
+                        
+                        \Yii::$app->trigger(\aminkt\ticket\Ticket::EVENT_ON_REPLY, new Event(['sender' => $event]));
 
                         Alert::success('عملیات با موفقیت انجام شد', 'پیام با موفقیت ارسال شد.');
                         return $this->redirect(['ticket', 'id' => $id]);
