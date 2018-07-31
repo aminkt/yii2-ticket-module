@@ -34,7 +34,7 @@ $this->title = 'مدیریت دپارتمان ادمین ها';
                                 ],
                                 'urlCreator' => function ($action, $model, $key, $index) {
                                     if ($action === 'update') {
-                                        return \yii\helpers\Url::to(['/ticket/admin/customer-care/user-department', 'userId' => $model->id]);
+                                        return \yii\helpers\Url::to(['/ticket/customer-care/user-department', 'userId' => $model->id]);
                                     }
                                 }
                             ]

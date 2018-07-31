@@ -2,7 +2,6 @@
 
 namespace aminkt\ticket\controllers\admin;
 use aminkt\ticket\components\TicketEvent;
-use aminkt\ticket\Ticket;
 
 use aminkt\ticket\models\Department;
 use aminkt\ticket\models\Ticket;
@@ -14,6 +13,7 @@ use Imagine\Exception\RuntimeException;
 use yii\data\ActiveDataProvider;
 use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
+use yii\helpers\FileHelper;
 use yii\web\Controller;
 use yii\base\Event;
 /**
@@ -23,7 +23,6 @@ use yii\base\Event;
  */
 class CustomerCareController extends Controller
 {
-
     /**
      * @inheritdoc
      */
@@ -41,6 +40,13 @@ class CustomerCareController extends Controller
                 ],
             ],
         ];
+    }
+
+    public function getViewPath()
+    {
+        $view = parent::getViewPath();
+        $view = FileHelper::normalizePath($view.'/../admin/customer-care');
+        return $view;
     }
 
     /**
@@ -122,7 +128,7 @@ class CustomerCareController extends Controller
         }
 
         $dataProvider = new ActiveDataProvider([
-            'query' => TicketMessage::find()->where(['ticketId' => $ticket->id])
+            'query' => $ticket->getTicketMessages()
         ]);
 
         $model = new TicketMessage();
@@ -131,9 +137,23 @@ class CustomerCareController extends Controller
 
             if ($model->load(\Yii::$app->getRequest()->post())) {
                 try {
-                    $ticket->sendNewMessage($model->getMessage(), $model->attachments, \Yii::$app->getUser()->getIdentity());
+                    $attachments = explode(',', $model->attachments);
+                    $model = $ticket->sendNewMessage($model->getMessage(), $attachments, \Yii::$app->getUser()->getIdentity());
                     try {
+                        $model->save();
                         $ticket->setStatus($ticket::STATUS_REPLIED);
+
+                        $event = new TicketEvent([
+                            'userName' => $model->getUser()->getName(),
+                            'userMobile' => $model->getUser()->getMobile(),
+                            'userEmail' => $model->getUser()->getEmail(),
+                            'status' => $ticket->status,
+                            'ticketSubject' => $ticket->subject
+                        ]);
+                        \Yii::$app->trigger(\aminkt\ticket\Ticket::EVENT_ON_REPLY, $event);
+
+                        Alert::success('عملیات با موفقیت انجام شد', 'پیام با موفقیت ارسال شد.');
+                        return $this->redirect(['ticket', 'id' => $id]);
                     } catch (RuntimeException $e) {
                         Alert::error('خطا', 'وضعیت تیکت ویرایش نشد');
                         return $this->redirect(['ticket', 'id' => $id]);
@@ -150,17 +170,11 @@ class CustomerCareController extends Controller
                 if (!$ticket->save()) {
                     Alert::error('خطا', 'تغییرات ذخیره نشد');
                     return $this->redirect(['ticket', 'id' => $id]);
+                }else{
+                    Alert::success('عملیات با موفقیت انجام شد', 'مشخصات تیکت با موفقیت ویرایش شد.');
+                    return $this->redirect(['ticket', 'id' => $id]);
                 }
             }
-
-            Alert::success('عملیات با موفقیت انجام شد', '');
-            $event = new TicketEvent();
-            $event->setUserName($ticket->getUserName());
-            $event->setUserMobile($ticket->getUserMobile());
-            $event->setUserEmail($ticket->getUserEmail());
-            $event->setTicketSubject($ticket->getSubject());
-            \Yii::$app->trigger(\aminkt\ticket\Ticket::EVENT_ON_REPLY, new Event(['sender' => $event]));
-            return $this->redirect(['ticket', 'id' => $id]);
         }
 
 
@@ -268,8 +282,4 @@ class CustomerCareController extends Controller
             'userDepartmentForm' => $userDepartmentFrom
         ]);
     }
-
-
-    
-
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace api\modules\ticket;
+namespace aminkt\ticket;
 
 use aminkt\ticket\interfaces\CustomerCareInterface;
 use aminkt\ticket\interfaces\CustomerInterface;
@@ -13,13 +13,15 @@ class Ticket extends \yii\base\Module
     /**
      * @inheritdoc
      */
-    public $controllerNamespace = 'aminkt\ticket\controllers';
+    public $controllerNamespace = 'aminkt\ticket\controllers\api';
 
     /** @var CustomerCareInterface Admin model */
     public $adminModel;
 
     /** @var CustomerInterface user model */
     public $userModel;
+
+    public $defaultRoute = 'customer-care/index';
 
     /** event for send message */
     const EVENT_ON_REPLY = 'eventTicketReply';
@@ -37,7 +39,7 @@ class Ticket extends \yii\base\Module
      *
      * @author Amin Keshavarz <amin@keshavarz.pro>
      */
-    public static function getInstance()
+    public static function getInstance() : self
     {
         if (parent::getInstance())
             return parent::getInstance();

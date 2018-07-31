@@ -8,6 +8,7 @@ use aminkt\uploadManager\UploadManager;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
+use yii\helpers\Html;
 use yii\web\NotFoundHttpException;
 
 /**
@@ -148,10 +149,44 @@ class TicketMessage extends ActiveRecord
      */
     public function getUser()
     {
-        if ($this->isCustomerCareReply()) {
+        if ($this->getIsCustomerCareReply()) {
             $adminModel = \aminkt\ticket\Ticket::getInstance()->adminModel;
             $customerCare = $adminModel::findOne($this->customerCareId);
-            return $customerCare;
+            $customerCareReturn = new class implements CustomerInterface {
+                public $id;
+                public $name;
+
+                /**
+                 * Return User Id.
+                 *
+                 * @return integer
+                 */
+                function getId(){
+                    return $this->id;
+                }
+
+                /**
+                 * Return user full name.
+                 *
+                 * @return string
+                 */
+                function getName(){
+                    return $this->name;
+                }
+
+                function getMobile()
+                {
+                    return null;
+                }
+
+                public function getEmail()
+                {
+                    return null;
+                }
+            };
+            $customerCareReturn->name = $customerCare->fullName;
+            $customerCareReturn->id = $customerCare->id;
+            return $customerCareReturn;
         } else {
             return $this->ticket->customer;
         }
@@ -162,7 +197,7 @@ class TicketMessage extends ActiveRecord
      *
      * @return bool
      */
-    public function isCustomerCareReply(): bool
+    public function getIsCustomerCareReply(): bool
     {
         return $this->customerCareId ? true : false;
     }
@@ -172,7 +207,7 @@ class TicketMessage extends ActiveRecord
      *
      * @param integer $id
      * @param string $message
-     * @param string $attachments
+     * @param array $attachments
      * @param CustomerCareInterface|null $customerCare
      *
      * @throws \RuntimeException    When cant create ticket.
@@ -181,15 +216,23 @@ class TicketMessage extends ActiveRecord
      *
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      */
-    public static function sendNewMessage(int $id, string $message, string $attachments, CustomerCareInterface $customerCare = null): self
+    public static function sendNewMessage(int $id, string $message, array $attachments, CustomerCareInterface $customerCare = null): self
     {
         $ticketMessage = new TicketMessage();
         $ticketMessage->ticketId = $id;
-        $ticketMessage->message = $message;
-        $ticketMessage->attachments = $attachments;
+        $ticketMessage->message = Html::encode($message);
+        $ticketMessage->attachments = implode(',', $attachments);
         if ($customerCare)
             $ticketMessage->customerCareId = $customerCare->getId();
-        $ticketMessage->save();
         return $ticketMessage;
+    }
+
+    public function fields()
+    {
+        $fields =  parent::fields();
+
+        unset($fields['customerCareId'], $fields['ticketId']);
+
+        return array_merge($fields, ['isCustomerCareReply', 'user']);
     }
 }
