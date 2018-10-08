@@ -31,7 +31,5 @@
     "psr-4": {
       "aminkt\\ticket\\": ""
     }
-  },
-  "minimum-stability": "dev",
-  "prefer-stable": true
+  }
 }
