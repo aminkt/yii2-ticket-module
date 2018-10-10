@@ -5,7 +5,7 @@ namespace aminkt\ticket\traits;
 use aminkt\ticket\Ticket;
 
 /**
- * Trait DepartmentTrait
+ * Trait TicketMessageTrait
  *
  * @property int $id
  * @property string $message
@@ -163,8 +163,7 @@ trait TicketMessageTrait
      */
     public function getTicket()
     {
-        $ticketModel = Ticket::getInstance()->ticketModel;
-        return $this->hasOne($ticketModel, ['id' => 'ticketId']);
+        return $this->hasOne(Ticket::getInstance()->ticketModel, ['id' => 'ticketId']);
     }
 
     /**

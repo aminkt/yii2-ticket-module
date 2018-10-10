@@ -2,6 +2,9 @@
 
 namespace aminkt\ticket\traits;
 
+
+use aminkt\ticket\Ticket;
+
 /**
  * Trait TicketTrait
  *
@@ -36,6 +39,7 @@ trait TicketTrait
      */
     public function rules()
     {
+        $departmentModel = Ticket::getInstance()->departmentModel;
         return [
             [['subject'], 'required'],
             [['name', 'mobile', 'email'], 'required', 'when' => function ($model) {
@@ -45,7 +49,7 @@ trait TicketTrait
             [['updateAt', 'createAt'], 'safe'],
             [['name', 'email', 'subject'], 'string', 'max' => 191],
             [['mobile'], 'string', 'max' => 15],
-            [['departmentId'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['departmentId' => 'id']],
+            [['departmentId'], 'exist', 'skipOnError' => true, 'targetClass' => $departmentModel, 'targetAttribute' => ['departmentId' => 'id']],
         ];
     }
 
@@ -106,7 +110,8 @@ trait TicketTrait
      */
     public function getTicketMessages()
     {
-        return $this->hasMany(TicketMessage::className(), ['ticketId' => 'id'])->orderBy(['updateAt' => SORT_DESC]);
+
+        return $this->hasMany(Ticket::getInstance()->ticketMessageModel, ['ticketId' => 'id'])->orderBy(['updateAt' => SORT_DESC]);
     }
 
     /**
@@ -114,7 +119,7 @@ trait TicketTrait
      */
     public function getDepartment()
     {
-        return $this->hasOne(Department::class, ['id' => 'departmentId']);
+        return $this->hasOne(Ticket::getInstance()->departmentModel, ['id' => 'departmentId']);
     }
 
     /**
@@ -246,7 +251,8 @@ trait TicketTrait
      */
     public static function createNewTicket(string $subject, CustomerInterface $customer, Department $department): self
     {
-        $ticket = new Ticket();
+        $ticketModel = Ticket::getInstance()->ticketModel;
+        $ticket = new $ticketModel();
         if($customer->getId()){
             $ticket->customerId = $customer->getId();
         }else{
@@ -310,7 +316,8 @@ trait TicketTrait
      */
     public function sendNewMessage(string $message, array $attachments, CustomerCareInterface $customerCare = null): TicketMessage
     {
-        $message = TicketMessage::sendNewMessage($this->id, $message, $attachments, $customerCare);
+        $ticketMessageModel = Ticket::getInstance()->ticketMessageModel;
+        $message = $ticketMessageModel::sendNewMessage($this->id, $message, $attachments, $customerCare);
         return $message;
     }
 
@@ -359,7 +366,8 @@ trait TicketTrait
      */
     public static function getCustomerCareTickets($userId)
     {
-        $query = Ticket::find();
+        $ticketModel = Ticket::getInstance()->ticketModel;
+        $query = $ticketModel::find();
         $query->leftJoin(
             '{{%ticket_user_departments}}',
             '{{%tickets}}.departmentId = {{%ticket_user_departments}}.departmentId')

@@ -2,6 +2,7 @@
 
 namespace aminkt\ticket\traits;
 
+use aminkt\ticket\interfaces\BaseTicketUserInterface;
 use aminkt\ticket\Ticket;
 
 /**
@@ -160,8 +161,7 @@ trait DepartmentTrait
      */
     public function getTickets()
     {
-        $ticketClassName = Ticket::getInstance()->ticketModel;
-        return $this->hasMany($ticketClassName, ['departmentId' => 'id']);
+        return $this->hasMany(Ticket::getInstance()->ticketModel, ['departmentId' => 'id']);
     }
 
     /**
@@ -235,4 +235,22 @@ trait DepartmentTrait
         $fields[] = 'tickets';
         return $fields;
     }
+
+    /**
+     * Assign an user to current department.
+     *
+     * @param BaseTicketUserInterface     $user           User object.
+     *
+     * @return boolean  User assigned or not.
+     */
+    public abstract function assign($user);
+
+    /**
+     * Remove user from current department.
+     *
+     * @param BaseTicketUserInterface     $user           User object.
+     *
+     * @return boolean  User removed or not.
+     */
+    public abstract function unAssign($user);
 }

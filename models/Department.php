@@ -2,11 +2,11 @@
 
 namespace aminkt\ticket\models;
 
-use Yii;
+use aminkt\ticket\interfaces\BaseTicketUserInterface;
+use aminkt\ticket\traits\DepartmentTrait;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
-use aminkt\ticket\traits\DepartmentTrait;
 
 /**
  * This is the model class for table "{{%ticket_departments}}".
@@ -72,5 +72,44 @@ class Department extends ActiveRecord
     public function fields()
     {
         return $this->traitFields();
+    }
+
+    /**
+     * @inheritdoc
+     *
+     * @param BaseTicketUserInterface $user User object.
+     *
+     * @return boolean
+     */
+    public function assign($user)
+    {
+        $model = new UserDepartment([
+            'userId' => $user->getId(),
+            'departmentId' => $this->id
+        ]);
+
+        return $model->save();
+    }
+
+
+    /**
+     * @inheritdoc
+     *
+     * @param BaseTicketUserInterface $user User object.
+     *
+     * @return boolean
+     */
+    public function unAssign($user)
+    {
+        $model = UserDepartment::findOne([
+            'userId' => $user->getId(),
+            'departmentId' => $this->id
+        ]);
+
+        if ($model) {
+            return $model->delete();
+        }
+
+        return true;
     }
 }
