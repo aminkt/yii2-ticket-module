@@ -6,24 +6,21 @@ use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
+use aminkt\ticket\traits\DepartmentTrait;
 
 /**
  * This is the model class for table "{{%ticket_departments}}".
- *
- * @property int $id
- * @property string $name
- * @property string $description
- * @property int $status
- * @property string $createAt
- * @property string $updateAt
- *
- * @property string $statusLabel
- * @property Ticket[] $tickets
  *
  * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
  */
 class Department extends ActiveRecord
 {
+    use DepartmentTrait {
+        rules as protected traitRules;
+        attributeLabels as protected traitAttributeLabels;
+        fields as protected traitFields;
+    }
+
     const STATUS_ACTIVE = 1;
     const STATUS_DEACTIVE = 2;
 
@@ -58,12 +55,7 @@ class Department extends ActiveRecord
      */
     public function rules()
     {
-        return [
-            [['name'], 'required'],
-            [['status'], 'integer'],
-            [['createAt', 'updateAt'], 'safe'],
-            [['name', 'description'], 'string', 'max' => 191],
-        ];
+        return $this->traitRules();
     }
 
     /**
@@ -71,42 +63,14 @@ class Department extends ActiveRecord
      */
     public function attributeLabels()
     {
-        return [
-            'id' => 'ID',
-            'name' => 'نام',
-            'description' => 'توضیحات',
-            'status' => 'وضعیت',
-            'createAt' => 'تاریخ ایجاد',
-            'updateAt' => 'تاریخ ویرایش',
-        ];
+        return $this->traitAttributeLabels();
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @inheritdoc
      */
-    public function getTickets()
+    public function fields()
     {
-        return $this->hasMany(Ticket::class, ['departmentId' => 'id']);
-    }
-
-    /**
-     * Returns status label
-     *
-     * @return string
-     *
-     * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
-     */
-    public function getStatusLabel()
-    {
-        switch ($this->status) {
-            case self::STATUS_ACTIVE:
-                return "فعال";
-                break;
-            case self::STATUS_DEACTIVE:
-                return "غیر فعال";
-                break;
-            default:
-                return "نامشخص";
-        }
+        return $this->traitFields();
     }
 }

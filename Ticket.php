@@ -21,10 +21,23 @@ class Ticket extends \yii\base\Module
     /** @var CustomerInterface user model */
     public $userModel;
 
-    public $defaultRoute = 'customer-care/index';
+    /** @var string $deprtmentModel Department model active record class name */
+    public $departmentModel = \aminkt\ticket\models\Department::class;
 
-    /** event for send message */
-    const EVENT_ON_REPLY = 'eventTicketReply';
+    /** @var string $ticketModel Ticket model active record class name */
+    public $ticketModel = \aminkt\ticket\models\Ticket::class;
+
+    /** @var string $ticketMessageModel Ticket model active record class name */
+    public $ticketMessageModel = \aminkt\ticket\models\TicketMessage::class;
+
+    /** Ticket events */
+    const EVENT_BEFORE_TICKET_REPLfgmY = 'eventBeforeTicketReply';
+    const EVENT_AFTER_TICKET_REPLY = 'eventAfterTicketReply';
+    const EVENT_BEFORE_TICKET_CREATE = 'eventBeforeTicketCreate';
+    const EVENT_AFTER_TICKET_CREATE = 'eventAfterTicketCreate';
+    const EVENT_BEFORE_TICKET_ASSIGN = 'eventBeforeTicketAssign';
+    const EVENT_AFTER_TICKET_ASSIGN = 'eventAfterTicketAssign';
+
 
     /**
      * @inheritdoc
@@ -32,6 +45,12 @@ class Ticket extends \yii\base\Module
     public function init()
     {
         parent::init();
+
+        $this->modules = [
+            'v1' => [
+                'class' => 'aminkt\ticket\api\v1\Module',
+            ],
+        ];
     }
 
     /**
