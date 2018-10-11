@@ -353,6 +353,6 @@ trait TicketMessageTrait
 
         unset($fields['customerCareId'], $fields['ticketId']);
 
-        return array_merge($fields, ['isCustomerCareReply', 'user']);
+        return array_merge($fields, ['isCustomerCareReply', 'user', 'attachments']);
     }
 }

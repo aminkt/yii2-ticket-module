@@ -25,9 +25,6 @@ class Ticket extends ActiveRecord implements TicketInterface
         attributeLabels as protected traitAttributeLabels;
     }
 
-    private $customerModel;
-    private $customerCareModel;
-
     /**
      * @inheritdoc
      */

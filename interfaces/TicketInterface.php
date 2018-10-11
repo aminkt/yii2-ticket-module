@@ -13,25 +13,24 @@ use yii\data\ActiveDataProvider;
  */
 interface TicketInterface
 {
-
-    const STATUS_NOT_REPLIED = 1;
-    const STATUS_REPLIED = 2;
-    const STATUS_CLOSED = 3;
-    const STATUS_BLOCKED = 4;
+    const STATUS_NOT_REPLIED = 'not_replied';
+    const STATUS_REPLIED = 'replied';
+    const STATUS_CLOSED = 'closed';
+    const STATUS_BLOCKED = 'blocked';
 
     /**
      * Create a relation between message and ticket models.
      *
-     * @return \yii\db\ActiveQuery
+     * @return \yii\db\ActiveQueryInterface
      */
-    public function getTicketMessages(): \yii\db\ActiveQuery;
+    public function getTicketMessages(): \yii\db\ActiveQueryInterface;
 
     /**
      * Create a relation between department and ticket models.
      *
-     * @return \yii\db\ActiveQuery
+     * @return \yii\db\ActiveQueryInterface
      */
-    public function getDepartment(): \yii\db\ActiveQuery;
+    public function getDepartment(): \yii\db\ActiveQueryInterface;
 
     /**
      * Change current ticket department.
@@ -89,13 +88,13 @@ interface TicketInterface
      *
      * @param string $subject
      * @param CustomerInterface $customer
-     * @param Department $department
+     * @param DepartmentInterface $department
      *
      * @return Ticket
      *
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      */
-    public static function createNewTicket(string $subject, CustomerInterface $customer, Department $department): TicketInterface;
+    public static function createNewTicket(string $subject, CustomerInterface $customer, DepartmentInterface $department): TicketInterface;
 
     /**
      * Send new message to current ticket.

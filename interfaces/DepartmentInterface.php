@@ -3,6 +3,7 @@
 namespace aminkt\ticket\interfaces;
 
 use yii\db\ActiveQuery;
+use yii\db\ActiveQueryInterface;
 
 /**
  * Interface DepartmentInterface
@@ -26,9 +27,9 @@ interface DepartmentInterface
     /**
      * Return tickets as active query.
      *
-     * @return \yii\db\ActiveQuery
+     * @return \yii\db\ActiveQueryInterface
      */
-    public function getTickets(): ActiveQuery;
+    public function getTickets(): ActiveQueryInterface;
 
     /**
      * Returns status label

@@ -171,7 +171,7 @@ trait DepartmentTrait
      *
      * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
      */
-    public function getStatusLabel()
+    public function getStatusLabel(): string
     {
         switch ($this->status) {
             case self::STATUS_ACTIVE:
@@ -232,7 +232,7 @@ trait DepartmentTrait
      */
     public function fields(){
         $fields = parent::fields();
-        $fields[] = 'tickets';
+        $fields[] = 'statusLabel';
         return $fields;
     }
 

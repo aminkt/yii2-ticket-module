@@ -134,6 +134,7 @@ class TicketController extends ActiveController
         }
 
         $ticket->department = $department;
+        $oldDepId = $ticket->department->id;
 
         if($ticket->hasErrors()){
             return $ticket->getErrors();
@@ -141,7 +142,6 @@ class TicketController extends ActiveController
 
         return [
             'message' => 'Department changed.',
-            'oldDepartmentId' => $model->getOldAttribute('departmentId'),
             'department' => $department
         ];
     }
