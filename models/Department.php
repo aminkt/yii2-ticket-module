@@ -3,6 +3,7 @@
 namespace aminkt\ticket\models;
 
 use aminkt\ticket\interfaces\BaseTicketUserInterface;
+use aminkt\ticket\interfaces\DepartmentInterface;
 use aminkt\ticket\traits\DepartmentTrait;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -13,16 +14,13 @@ use yii\db\Expression;
  *
  * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
  */
-class Department extends ActiveRecord
+class Department extends ActiveRecord implements DepartmentInterface
 {
     use DepartmentTrait {
         rules as protected traitRules;
         attributeLabels as protected traitAttributeLabels;
         fields as protected traitFields;
     }
-
-    const STATUS_ACTIVE = 1;
-    const STATUS_DEACTIVE = 2;
 
     /**
      * {@inheritdoc}

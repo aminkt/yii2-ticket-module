@@ -4,6 +4,7 @@ namespace aminkt\ticket\models;
 
 use aminkt\ticket\interfaces\CustomerCareInterface;
 use aminkt\ticket\interfaces\CustomerInterface;
+use aminkt\ticket\interfaces\TicketInterface;
 use aminkt\ticket\traits\TicketTrait;
 use aminkt\widgets\alert\Alert;
 use Imagine\Exception\RuntimeException;
@@ -17,17 +18,12 @@ use yii\db\Expression;
  *
  * @package aminkt\ticket
  */
-class Ticket extends ActiveRecord
+class Ticket extends ActiveRecord implements TicketInterface
 {
     use TicketTrait {
         rules as protected traitRules;
         attributeLabels as protected traitAttributeLabels;
     }
-
-    const STATUS_NOT_REPLIED = 1;
-    const STATUS_REPLIED = 2;
-    const STATUS_CLOSED = 3;
-    const STATUS_BLOCKED = 4;
 
     private $customerModel;
     private $customerCareModel;

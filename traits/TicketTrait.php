@@ -3,6 +3,10 @@
 namespace aminkt\ticket\traits;
 
 
+use aminkt\normalizer\yii2\MoblieValidatoer;
+use aminkt\ticket\interfaces\DepartmentInterface;
+use aminkt\ticket\interfaces\MessageInterface;
+use aminkt\ticket\interfaces\TicketInterface;
 use aminkt\ticket\Ticket;
 
 /**
@@ -37,19 +41,28 @@ trait TicketTrait
     /**
      * @inheritdoc
      */
-    public function rules()
+    public function rules($isMongo = false)
     {
         $departmentModel = Ticket::getInstance()->departmentModel;
+        $customerModel = Ticket::getInstance()->userModel;
+        $idName = $isMongo ? '_id' : 'id';
         return [
-            [['subject'], 'required'],
+            [['subject', 'customerId', 'departmentId'], 'required'],
             [['name', 'mobile', 'email'], 'required', 'when' => function ($model) {
                 return !$model->customerId;
             }],
-            [['customerId', 'status', 'departmentId'], 'integer'],
-            [['updateAt', 'createAt'], 'safe'],
-            [['name', 'email', 'subject'], 'string', 'max' => 191],
-            [['mobile'], 'string', 'max' => 15],
-            [['departmentId'], 'exist', 'skipOnError' => true, 'targetClass' => $departmentModel, 'targetAttribute' => ['departmentId' => 'id']],
+            [['status'], 'in', 'range' => [
+                TicketInterface::STATUS_BLOCKED,
+                TicketInterface::STATUS_CLOSED,
+                TicketInterface::STATUS_REPLIED,
+                TicketInterface::STATUS_NOT_REPLIED
+            ]],
+            [['status'], 'default', 'value' => TicketInterface::STATUS_NOT_REPLIED],
+            [['name', 'subject'], 'string', 'max' => 191],
+            [['mobile'], MoblieValidatoer::class],
+            [['email'], 'email'],
+            [['customerId'], 'exist', 'skipOnError' => true, 'targetClass' => $customerModel, 'targetAttribute' => ['customerId' => $idName]],
+            [['departmentId'], 'exist', 'skipOnError' => true, 'targetClass' => $departmentModel, 'targetAttribute' => ['departmentId' => $idName]],
         ];
     }
 
@@ -120,6 +133,18 @@ trait TicketTrait
     public function getDepartment()
     {
         return $this->hasOne(Ticket::getInstance()->departmentModel, ['id' => 'departmentId']);
+    }
+
+    /**
+     * Change current ticket department.
+     *
+     * @param DepartmentInterface   $department
+     *
+     * @return void
+     */
+    public function setDepartment($department){
+        $this->departmentId = $department->getId();
+        $this->save();
     }
 
     /**
@@ -274,7 +299,7 @@ trait TicketTrait
      *
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      */
-    public function generateTrackingCode()
+    protected function generateTrackingCode()
     {
         $date = gmdate('yndhis', time());
         $finalCode = $this->generateRandomString(4) . $date . $this->generateRandomString(4);
@@ -290,7 +315,7 @@ trait TicketTrait
      *
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      */
-    function generateRandomString($length = 10)
+    protected function generateRandomString($length = 10)
     {
         $characters = 'abcdefghijklmnopqrstuvwxyz';
         $charactersLength = strlen($characters);
@@ -314,7 +339,7 @@ trait TicketTrait
      *
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      */
-    public function sendNewMessage(string $message, array $attachments, CustomerCareInterface $customerCare = null): TicketMessage
+    public function sendNewMessage(string $message, array $attachments, CustomerCareInterface $customerCare = null): MessageInterface
     {
         $ticketMessageModel = Ticket::getInstance()->ticketMessageModel;
         $message = $ticketMessageModel::sendNewMessage($this->id, $message, $attachments, $customerCare);
@@ -325,15 +350,12 @@ trait TicketTrait
      * Close current ticket.
      *
      * @return $this
-     *
-     * @throws \RuntimeException    When cant close current ticket.
      */
     public function closeTicket()
     {
         $this->status = self::STATUS_CLOSED;
         if (!$this->save()) {
             \Yii::error($this->getErrors());
-            throw new \RuntimeException("Cant close ticket.");
         }
         return $this;
     }
@@ -342,15 +364,12 @@ trait TicketTrait
      * Open current ticket.
      *
      * @return $this
-     *
-     * @throws \RuntimeException    When cant open current ticket.
      */
     public function openTicket()
     {
         $this->status = self::STATUS_NOT_REPLIED;
         if (!$this->save()) {
             \Yii::error($this->getErrors());
-            throw new \RuntimeException("Cant open ticket.");
         }
         return $this;
     }

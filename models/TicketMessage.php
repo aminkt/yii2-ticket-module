@@ -4,6 +4,7 @@ namespace aminkt\ticket\models;
 
 use aminkt\ticket\interfaces\CustomerCareInterface;
 use aminkt\ticket\interfaces\CustomerInterface;
+use aminkt\ticket\interfaces\MessageInterface;
 use aminkt\ticket\traits\TicketMessageTrait;
 use aminkt\uploadManager\UploadManager;
 use yii\behaviors\TimestampBehavior;
@@ -15,7 +16,7 @@ use yii\web\NotFoundHttpException;
 /**
  * This is the model class for table "ticket_messages".
  */
-class TicketMessage extends ActiveRecord
+class TicketMessage extends ActiveRecord implements MessageInterface
 {
     use TicketMessageTrait {
         rules as traitRules;
