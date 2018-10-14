@@ -30,7 +30,7 @@
   },
   "autoload": {
     "psr-4": {
-      "aminkt\\ticket\\": ""
+      "aminkt\\ticket\\": "src"
     }
   }
 }
