@@ -35,7 +35,7 @@ class DepartmentController extends ActiveController
      *
      * @throws NotFoundHttpException
      */
-    public function actionAssignment($id, $isUnAssign = false)
+    public function actionAssignment($id)
     {
         $department = ($this->modelClass)::findOne($id);
         if (!$department) {
@@ -61,7 +61,7 @@ class DepartmentController extends ActiveController
         $customerCareModel = Ticket::getInstance()->adminModel;
         $user = $customerCareModel::findOne($userId);
 
-        if ($isUnAssign) {
+        if (\Yii::$app->request->isDelete) {
             if (!$department->unAssign($user)) {
                 throw new ServerErrorHttpException("User un assignment become failed.");
             }
@@ -71,8 +71,8 @@ class DepartmentController extends ActiveController
             };
         }
 
-
-        \Yii::$app->getResponse()->setStatusCode(204);
+        return $department;
+//        \Yii::$app->getResponse()->setStatusCode(204);
     }
 
     /**
