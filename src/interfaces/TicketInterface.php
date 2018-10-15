@@ -105,7 +105,7 @@ interface TicketInterface
      *
      * @throws \RuntimeException    When cant create ticket.
      *
-     * @return TicketMessage
+     * @return MessageInterface
      *
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      */

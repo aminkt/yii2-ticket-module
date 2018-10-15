@@ -2,7 +2,10 @@
 
 namespace aminkt\ticket\traits;
 
+use aminkt\ticket\interfaces\MessageInterface;
 use aminkt\ticket\Ticket;
+use yii\helpers\Html;
+use aminkt\ticket\interfaces\CustomerCareInterface;
 
 /**
  * Trait TicketMessageTrait
@@ -89,15 +92,16 @@ trait TicketMessageTrait
      * @return array validation rules
      * @see scenarios()
      */
-    public function rules()
+    public function rules($isMongo = false)
     {
         $ticketModel = Ticket::getInstance()->ticketModel;
+        $customerCateModel = Ticket::getInstance()->adminModel;
+        $idName = $isMongo ? '_id' : 'id';
         return [
             [['message'], 'string'],
-            [['ticketId', 'customerCareId'], 'integer'],
-            [['updateAt', 'createAt'], 'safe'],
             [['attachments'], 'string', 'max' => 191],
-            [['ticketId'], 'exist', 'skipOnError' => true, 'targetClass' => $ticketModel, 'targetAttribute' => ['ticketId' => 'id']],
+            [['ticketId'], 'exist', 'skipOnError' => true, 'targetClass' => $ticketModel, 'targetAttribute' => ['ticketId' => $idName]],
+            [['customerCareId'], 'exist', 'skipOnError' => true, 'targetClass' => $customerCateModel, 'targetAttribute' => ['ticketId' => $isMongo]],
         ];
     }
 
@@ -204,7 +208,7 @@ trait TicketMessageTrait
      *
      * @author Saghar Mojdehi <saghar.mojdehi@gmail.com>
      */
-    public function getAttachmentUrl()
+    public function getAttachmentsUrl()
     {
         $urls = [];
         foreach ($this->getAttachments() as $attachment) {
@@ -290,13 +294,15 @@ trait TicketMessageTrait
      *
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      */
-    public static function sendNewMessage(int $id, string $message, array $attachments, CustomerCareInterface $customerCare = null): self
+    public static function sendNewMessage($id, string $message, array $attachments, CustomerCareInterface $customerCare = null): MessageInterface
     {
         $messageModel = Ticket::getInstance()->ticketMessageModel;
         $ticketMessage = new $messageModel();
         $ticketMessage->ticketId = $id;
         $ticketMessage->message = Html::encode($message);
-        $ticketMessage->attachments = implode(',', $attachments);
+        if(count($attachments)){
+            $ticketMessage->attachments = implode(',', $attachments);
+        }
         if ($customerCare)
             $ticketMessage->customerCareId = $customerCare->getId();
         return $ticketMessage;
