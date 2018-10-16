@@ -12,11 +12,11 @@ use aminkt\ticket\interfaces\CustomerCareInterface;
  *
  * @property int $id
  * @property string $message
- * @property int $ticketId
+ * @property int $ticket_id
  * @property string $attachments
- * @property int $customerCareId
- * @property string $updateAt
- * @property string $createAt
+ * @property int $customer_care_id
+ * @property string $update_at
+ * @property string $create_at
  *
  * @property \aminkt\ticket\interfaces\CustomerCareInterface|null $customerCareUser
  * @property \aminkt\ticket\interfaces\CustomerCareInterface|\aminkt\ticket\interfaces\CustomerInterface $user
@@ -100,8 +100,8 @@ trait TicketMessageTrait
         return [
             [['message'], 'string'],
             [['attachments'], 'string', 'max' => 191],
-            [['ticketId'], 'exist', 'skipOnError' => true, 'targetClass' => $ticketModel, 'targetAttribute' => ['ticketId' => $idName]],
-            [['customerCareId'], 'exist', 'skipOnError' => true, 'targetClass' => $customerCateModel, 'targetAttribute' => ['ticketId' => $isMongo]],
+            [['ticket_id'], 'exist', 'skipOnError' => true, 'targetClass' => $ticketModel, 'targetAttribute' => ['ticket_id' => $idName]],
+            [['customer_care_id'], 'exist', 'skipOnError' => true, 'targetClass' => $customerCateModel, 'targetAttribute' => ['ticket_id' => $isMongo]],
         ];
     }
 
@@ -125,11 +125,11 @@ trait TicketMessageTrait
         return [
             '_id',
             'message',
-            'ticketId',
+            'ticket_id',
             'attachments',
-            'customerCareId',
-            'updateAt',
-            'createAt',
+            'customer_care_id',
+            'update_at',
+            'create_at',
         ];
     }
 
@@ -154,11 +154,11 @@ trait TicketMessageTrait
         return [
             'id' => 'ID',
             'message' => 'متن پیام',
-            'ticketId' => 'شناسه تیکت',
+            'ticket_id' => 'شناسه تیکت',
             'attachments' => 'پیوست ها',
-            'customerCareId' => 'Customer Care ID',
-            'updateAt' => 'تاریخ ویرایش',
-            'createAt' => 'تاریخ ایجاد',
+            'customer_care_id' => 'Customer Care ID',
+            'update_at' => 'تاریخ ویرایش',
+            'create_at' => 'تاریخ ایجاد',
         ];
     }
 
@@ -167,7 +167,7 @@ trait TicketMessageTrait
      */
     public function getTicket()
     {
-        return $this->hasOne(Ticket::getInstance()->ticketModel, ['id' => 'ticketId']);
+        return $this->hasOne(Ticket::getInstance()->ticketModel, ['id' => 'ticket_id']);
     }
 
     /**
@@ -229,7 +229,7 @@ trait TicketMessageTrait
     {
         if ($this->getIsCustomerCareReply()) {
             $adminModel = \aminkt\ticket\Ticket::getInstance()->adminModel;
-            $customerCare = $adminModel::findOne($this->customerCareId);
+            $customerCare = $adminModel::findOne($this->customer_care_id);
             $customerCareReturn = new class implements CustomerInterface {
                 public $id;
                 public $name;
@@ -277,7 +277,7 @@ trait TicketMessageTrait
      */
     public function getIsCustomerCareReply(): bool
     {
-        return $this->customerCareId ? true : false;
+        return $this->customer_care_id ? true : false;
     }
 
     /**
@@ -298,13 +298,13 @@ trait TicketMessageTrait
     {
         $messageModel = Ticket::getInstance()->ticketMessageModel;
         $ticketMessage = new $messageModel();
-        $ticketMessage->ticketId = $id;
+        $ticketMessage->ticket_id = $id;
         $ticketMessage->message = Html::encode($message);
         if(count($attachments)){
             $ticketMessage->attachments = implode(',', $attachments);
         }
         if ($customerCare)
-            $ticketMessage->customerCareId = $customerCare->getId();
+            $ticketMessage->customer_care_id = $customerCare->getId();
         return $ticketMessage;
     }
 
@@ -357,7 +357,7 @@ trait TicketMessageTrait
     public function fields(){
         $fields =  parent::fields();
 
-        unset($fields['customerCareId'], $fields['ticketId']);
+        unset($fields['customer_care_id'], $fields['ticket_id']);
 
         return array_merge($fields, ['isCustomerCareReply', 'user', 'attachments']);
     }

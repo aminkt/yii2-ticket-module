@@ -39,8 +39,8 @@ class Department extends ActiveRecord implements DepartmentInterface
             [
                 'class' => TimestampBehavior::class,
                 'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['createAt', 'updateAt'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updateAt'],
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['create_at', 'update_at'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['update_at'],
                 ],
                 // if you're using datetime instead of UNIX timestamp:
                 'value' => new Expression('NOW()'),
@@ -82,8 +82,8 @@ class Department extends ActiveRecord implements DepartmentInterface
     public function assign($user)
     {
         $model = new UserDepartment([
-            'userId' => $user->getId(),
-            'departmentId' => $this->id
+            'user_id' => $user->getId(),
+            'department_id' => $this->id
         ]);
 
         return $model->save();
@@ -100,8 +100,8 @@ class Department extends ActiveRecord implements DepartmentInterface
     public function unAssign($user)
     {
         $model = UserDepartment::findOne([
-            'userId' => $user->getId(),
-            'departmentId' => $this->id
+            'user_id' => $user->getId(),
+            'department_id' => $this->id
         ]);
 
         if ($model) {

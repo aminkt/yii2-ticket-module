@@ -33,8 +33,8 @@ class TicketMessage extends ActiveRecord implements MessageInterface
             [
                 'class' => TimestampBehavior::className(),
                 'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['createAt', 'updateAt'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updateAt'],
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['create_at', 'update_at'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['update_at'],
                 ],
                 // if you're using datetime instead of UNIX timestamp:
                 'value' => new Expression('NOW()'),

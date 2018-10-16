@@ -12,8 +12,8 @@ use aminkt\ticket\Ticket;
  * @property string $name
  * @property string $description
  * @property int $status
- * @property string $createAt
- * @property string $updateAt
+ * @property string $create_at
+ * @property string $update_at
  *
  * @property string $statusLabel
  * @property Ticket[] $tickets
@@ -121,8 +121,8 @@ trait DepartmentTrait
             'name',
             'description',
             'status',
-            'createAt',
-            'updateAt',
+            'create_at',
+            'update_at',
         ];
     }
 
@@ -149,8 +149,8 @@ trait DepartmentTrait
             'name' => 'نام',
             'description' => 'توضیحات',
             'status' => 'وضعیت',
-            'createAt' => 'تاریخ ایجاد',
-            'updateAt' => 'تاریخ ویرایش',
+            'create_at' => 'تاریخ ایجاد',
+            'update_at' => 'تاریخ ویرایش',
         ];
     }
 

@@ -18,15 +18,15 @@ use yii\db\ActiveQueryInterface;
  *
  * @property int $id
  * @property string $name
- * @property int $customerId
+ * @property int $customer_id
  * @property string $mobile
  * @property string $email
  * @property string $subject
- * @property int $departmentId
+ * @property int $department_id
  * @property int $status
- * @property string $updateAt
- * @property string $createAt
- * @property string $trackingCode
+ * @property string $update_at
+ * @property string $create_at
+ * @property string $tracking_code
  *
  * @property TicketMessage[] $ticketMessages
  * @property string $userName
@@ -61,15 +61,15 @@ trait TicketTrait
         $ticketModel = Ticket::getInstance()->ticketModel;
         $ticket = new $ticketModel();
         if ($customer->getId()) {
-            $ticket->customerId = $customer->getId();
+            $ticket->customer_id = $customer->getId();
         } else {
             $ticket->name = $customer->getName();
             $ticket->mobile = $customer->getMobile();
             $ticket->email = $customer->getEmail();
         }
-        $ticket->departmentId = $department->id;
+        $ticket->department_id = $department->id;
         $ticket->subject = $subject;
-        $ticket->trackingCode = $ticket->generateTrackingCode();
+        $ticket->tracking_code = $ticket->generatetracking_code();
         $ticket->status = self::STATUS_NOT_REPLIED;
         return $ticket;
     }
@@ -89,7 +89,7 @@ trait TicketTrait
         $query = $ticketModel::find();
         $query->leftJoin(
             '{{%ticket_user_departments}}',
-            '{{%tickets}}.departmentId = {{%ticket_user_departments}}.departmentId')
+            '{{%tickets}}.department_id = {{%ticket_user_departments}}.department_id')
             ->andWhere(['{{%ticket_user_departments}}.userId' => $userId]);
 
         $dataProvider = new ActiveDataProvider([
@@ -108,9 +108,9 @@ trait TicketTrait
         $customerModel = Ticket::getInstance()->userModel;
         $idName = $isMongo ? '_id' : 'id';
         return [
-            [['subject', 'customerId', 'departmentId'], 'required'],
+            [['subject', 'customer_id', 'department_id'], 'required'],
             [['name', 'mobile', 'email'], 'required', 'when' => function ($model) {
-                return !$model->customerId;
+                return !$model->customer_id;
             }],
             [['status'], 'in', 'range' => [
                 static::STATUS_BLOCKED,
@@ -122,8 +122,8 @@ trait TicketTrait
             [['name', 'subject'], 'string', 'max' => 191],
             [['mobile'], MoblieValidatoer::class],
             [['email'], 'email'],
-            [['customerId'], 'exist', 'skipOnError' => true, 'targetClass' => $customerModel, 'targetAttribute' => ['customerId' => $idName]],
-            [['departmentId'], 'exist', 'skipOnError' => true, 'targetClass' => $departmentModel, 'targetAttribute' => ['departmentId' => $idName]],
+            [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => $customerModel, 'targetAttribute' => ['customer_id' => $idName]],
+            [['department_id'], 'exist', 'skipOnError' => true, 'targetClass' => $departmentModel, 'targetAttribute' => ['department_id' => $idName]],
         ];
     }
 
@@ -147,15 +147,14 @@ trait TicketTrait
         return [
             '_id',
             'name',
-            'customerId',
+            'customer_id',
             'mobile',
             'email',
             'subject',
-            'departmentId',
+            'department_id',
             'status',
-            'updateAt',
-            'createAt',
-            'userName',
+            'update_at',
+            'create_at',
         ];
     }
 
@@ -167,14 +166,14 @@ trait TicketTrait
         return [
             'id' => 'شماره شناسه',
             'name' => 'نام',
-            'customerId' => 'کاربر',
+            'customer_id' => 'کاربر',
             'mobile' => 'موبایل',
             'email' => 'ایمیل',
             'subject' => 'موضوع',
-            'departmentId' => 'دپارتمان',
+            'department_id' => 'دپارتمان',
             'status' => 'موقعیت',
-            'updateAt' => 'تاریخ ویرایش',
-            'createAt' => 'تاریخ ایجاد',
+            'update_at' => 'تاریخ ویرایش',
+            'create_at' => 'تاریخ ایجاد',
             'userName' => 'نام کاربر',
         ];
     }
@@ -185,7 +184,7 @@ trait TicketTrait
     public function getTicketMessages(): ActiveQueryInterface
     {
 
-        return $this->hasMany(Ticket::getInstance()->ticketMessageModel, ['ticketId' => 'id'])->orderBy(['updateAt' => SORT_DESC]);
+        return $this->hasMany(Ticket::getInstance()->ticketMessageModel, ['ticketId' => 'id'])->orderBy(['update_at' => SORT_DESC]);
     }
 
     /**
@@ -193,7 +192,7 @@ trait TicketTrait
      */
     public function getDepartment(): ActiveQueryInterface
     {
-        return $this->hasOne(Ticket::getInstance()->departmentModel, ['id' => 'departmentId']);
+        return $this->hasOne(Ticket::getInstance()->departmentModel, ['id' => 'department_id']);
     }
 
     /**
@@ -205,7 +204,7 @@ trait TicketTrait
      */
     public function setDepartment($department)
     {
-        $this->departmentId = $department->getId();
+        $this->department_id = $department->getId();
         $this->save();
     }
 
@@ -291,7 +290,7 @@ trait TicketTrait
             return $customer;
         } else {
             $modelClass = \aminkt\ticket\Ticket::getInstance()->userModel;
-            $this->customerModel = $modelClass::findOne($this->customerId);
+            $this->customerModel = $modelClass::findOne($this->customer_id);
         }
 
         return $this->customerModel;
@@ -304,7 +303,7 @@ trait TicketTrait
      */
     function getIsGuestTicket(): bool
     {
-        return $this->customerId ? false : true;
+        return $this->customer_id ? false : true;
     }
 
     /**
@@ -413,7 +412,7 @@ trait TicketTrait
     {
         $fields = parent::fields();
 
-        unset($fields['customerId'], $fields['departmentId'], $fields['name'], $fields['family'], $fields['mobile'], $fields['email']);
+        unset($fields['customer_id'], $fields['department_id'], $fields['name'], $fields['family'], $fields['mobile'], $fields['email']);
 
         return array_merge($fields, ['statusLabel', 'isGuestTicket', 'customer', 'department']);
     }
@@ -437,13 +436,13 @@ trait TicketTrait
     }
 
     /**
-     * create trackingCode for each ticket
+     * create tracking_code for each ticket
      *
      * @return string
      *
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      */
-    protected function generateTrackingCode()
+    protected function generatetracking_code()
     {
         $date = gmdate('yndhis', time());
         $finalCode = $this->generateRandomString(4) . $date . $this->generateRandomString(4);
