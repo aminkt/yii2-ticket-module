@@ -1,7 +1,10 @@
 <?php
-namespace yiiunit\gii;
+namespace yiiunit\ticket;
+
+use PHPUnit\Framework\TestCase;
 use Yii;
-use yii\gii\Module;
+use aminkt\ticket\Ticket;
+
 class ModuleTest extends TestCase
 {
     public function testDefaultVersion()
@@ -10,7 +13,7 @@ class ModuleTest extends TestCase
             'name' => 'aminkt/yii2-ticket-modulei',
             'version' => '1.0.0',
         ];
-        $module = new Module('ticket');
+        $module = new Ticket('ticket');
         $this->assertEquals('1.0.0', $module->getVersion());
     }
 }

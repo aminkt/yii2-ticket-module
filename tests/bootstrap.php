@@ -7,6 +7,6 @@ $_SERVER['SCRIPT_NAME'] = '/' . __DIR__;
 $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 require_once(__DIR__ . '/../vendor/autoload.php');
 require_once(__DIR__ . '/../vendor/yiisoft/yii2/Yii.php');
-Yii::setAlias('@yiiunit/ticket', __DIR__);
-Yii::setAlias('@yii/ticket', dirname(__DIR__) . '/src');
+Yii::setAlias('@unitaminkt/ticket', __DIR__);
+Yii::setAlias('@aminkt/ticket', dirname(__DIR__) . '/src');
 require_once(__DIR__ . '/compatibility.php');
