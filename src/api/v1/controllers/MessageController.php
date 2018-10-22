@@ -42,13 +42,11 @@ class MessageController extends ActiveController
     /**
      * @inheritdoc
      */
-    public function beforeAction($action)
+    public function verbs()
     {
-        if(\Yii::$app->request->isOptions){
-            \Yii::$app->response->setStatusCode(200);
-            die();
-        }
-        return parent::beforeAction($action);
+        $verbs = parent::verbs();
+        $verbs['index'] = ['GET', 'OPTIONS'];
+        return $verbs;
     }
 
     /**
@@ -61,6 +59,11 @@ class MessageController extends ActiveController
      * @throws NotFoundHttpException    When ticket id is not valid.
      */
     public function actionIndex($ticketId){
+
+        if(\Yii::$app->getRequest()->isOptions){
+            return true;
+        }
+
         $ticketModel = Ticket::getInstance()->ticketModel;
         $ticket = $ticketModel::findOne($ticketId);
         if(!$ticket){
@@ -71,8 +74,8 @@ class MessageController extends ActiveController
         $messagesModel = Ticket::getInstance()->ticketMessageModel;
 
         $messages = $messagesModel::find()->where([
-            'ticketId' => $ticketId,
-        ])->orderBy(['id' => SORT_DESC]);
+            'ticket_id' => $ticketId,
+        ])->orderBy(['create_at' => SORT_DESC]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $messages
@@ -103,12 +106,21 @@ class MessageController extends ActiveController
         $values = \Yii::$app->getRequest()->post();
         $message = ArrayHelper::getValue($values, 'message');
         $attachments = ArrayHelper::getValue($values, 'atachments', []);
-        $customerCareId = ArrayHelper::getValue($post, 'customerCareId', null);
+        $customerCareId = ArrayHelper::getValue($values, 'customer_care_id');
 
-        $message = $ticket->sendNewMessage($message, $attachments, $customerCareId);
+        if($customerCareId){
+            $customerCareModel = Ticket::getInstance()->adminModel;
+            $customerCare = $customerCareModel::findOne($customerCareId);
+        } else {
+            $customerCare = null;
+        }
+
+
+        $message = $ticket->sendNewMessage($message, $attachments, $customerCare);
 
 
         if(!$message->save()){
+            \Yii::$app->getResponse()->setStatusCode(400);
             return $message->getErrors();
         }
 

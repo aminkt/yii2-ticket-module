@@ -3,6 +3,7 @@
 namespace aminkt\ticket\traits;
 
 use aminkt\ticket\interfaces\MessageInterface;
+use aminkt\ticket\interfaces\CustomerInterface;
 use aminkt\ticket\Ticket;
 use yii\helpers\Html;
 use aminkt\ticket\interfaces\CustomerCareInterface;
@@ -95,13 +96,13 @@ trait TicketMessageTrait
     public function rules($isMongo = false)
     {
         $ticketModel = Ticket::getInstance()->ticketModel;
-        $customerCateModel = Ticket::getInstance()->adminModel;
+        $customerCareModel = Ticket::getInstance()->adminModel;
         $idName = $isMongo ? '_id' : 'id';
         return [
             [['message'], 'string'],
             [['attachments'], 'string', 'max' => 191],
             [['ticket_id'], 'exist', 'skipOnError' => true, 'targetClass' => $ticketModel, 'targetAttribute' => ['ticket_id' => $idName]],
-            [['customer_care_id'], 'exist', 'skipOnError' => true, 'targetClass' => $customerCateModel, 'targetAttribute' => ['ticket_id' => $isMongo]],
+            [['customer_care_id'], 'exist', 'skipOnError' => true, 'targetClass' => $customerCareModel, 'targetAttribute' => ['customer_care_id' => $idName]],
         ];
     }
 
@@ -261,6 +262,11 @@ trait TicketMessageTrait
                 {
                     return null;
                 }
+
+                public function getType()
+                {
+                    return 'customer_care';
+                }
             };
             $customerCareReturn->name = $customerCare->fullName;
             $customerCareReturn->id = $customerCare->id;
@@ -303,8 +309,10 @@ trait TicketMessageTrait
         if(count($attachments)){
             $ticketMessage->attachments = implode(',', $attachments);
         }
-        if ($customerCare)
+
+        if ($customerCare){
             $ticketMessage->customer_care_id = $customerCare->getId();
+        }
         return $ticketMessage;
     }
 

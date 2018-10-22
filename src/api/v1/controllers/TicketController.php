@@ -2,9 +2,12 @@
 
 namespace aminkt\ticket\api\v1\controllers;
 
+use aminkt\ticket\interfaces\BaseTicketUserInterface;
+use aminkt\ticket\interfaces\DepartmentInterface;
 use aminkt\ticket\interfaces\TicketInterface;
 use aminkt\ticket\Ticket;
 use aminkt\ticket\traits\TicketTrait;
+use yii\helpers\ArrayHelper;
 use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
 
@@ -25,6 +28,121 @@ class TicketController extends ActiveController
     {
         $this->modelClass = Ticket::getInstance()->ticketModel;
         parent::init();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function actions()
+    {
+        $actions = parent::actions();
+        unset($actions['create'], $actions['update']);
+        return $actions;
+    }
+
+
+    /**
+     * Create a new ticket.
+     *
+     * @var String     $message        Ticket message.
+     * @var String     $subject        Ticket subject.
+     * @var String     $departmentId   Ticket department id.
+     * @var String     $customerId     Ticket customer id.
+     * @var String     $status         Ticket status.
+     */
+    public function actionCreate(){
+        $params = \Yii::$app->request->post();
+
+        $message = ArrayHelper::getValue($params, 'message');
+        $subject = ArrayHelper::getValue($params, 'subject');
+        $departmentId = ArrayHelper::getValue($params, 'departmentId');
+        $customerId = ArrayHelper::getValue($params, 'customerId');
+        $status = ArrayHelper::getValue($params, 'status');
+
+
+        $modelName = Ticket::getInstance()->ticketModel;
+        $customerModelName = Ticket::getInstance()->userModel;
+        $departmentModelName = Ticket::getInstance()->departmentModel;
+
+        /** @var BaseTicketUserInterface $user */
+        $user = $customerModelName::findOne($customerId);
+        if(!$user) {
+            throw new NotFoundHttpException("Coustomer id is not valid!");
+        }
+
+        /** @var DepartmentInterface $department */
+        $department = $departmentModelName::findOne($departmentId);
+        if(!$department) {
+            throw new NotFoundHttpException("Department id is not valid!");
+        }
+
+        /** @var TicketInterface $model */
+        $model = $modelName::createNewTicket($subject, $user, $department);
+        if(!$model){
+            throw new NotFoundHttpException("Ticket not found!");
+        }
+
+        if(!$model->save()){
+            return $model->getErrors();
+        }
+
+        $message = $model->sendNewMessage($message, []);
+
+        if(!$message->save()){
+            return $message->getErrors();
+        }
+
+        return $model;
+    }
+
+    /**
+     * Update user ticket and send new message if filled message param.
+     *
+     * @param string    $id     Ticket id.
+     *
+     * @return TicketInterface
+     *
+     * @throws NotFoundHttpException
+     */
+    public function actionUpdate($id){
+        $params = \Yii::$app->request->post();
+
+        $message = ArrayHelper::getValue($params, 'message');
+        $subject = ArrayHelper::getValue($params, 'subject');
+
+
+        $modelName = Ticket::getInstance()->ticketModel;
+        $customerModelName = Ticket::getInstance()->userModel;
+        $departmentModelName = Ticket::getInstance()->departmentModel;
+
+        /** @var BaseTicketUserInterface $user */
+        $user = $customerModelName::findOne($customerId);
+        if(!$user) {
+            throw new NotFoundHttpException("Coustomer id is not valid!");
+        }
+
+        /** @var DepartmentInterface $department */
+        $department = $departmentModelName::findOne($departmentId);
+        if(!$department) {
+            throw new NotFoundHttpException("Department id is not valid!");
+        }
+
+        /** @var TicketInterface $model */
+        $model = $modelName::findOne($id);
+        if(!$model){
+            throw new NotFoundHttpException("Ticket not found!");
+        }
+
+        if($message){
+            $messageModel = $model->sendNewMessage($message, []);
+
+            if(!$messageModel->save()){
+                return $messageModel->getErrors();
+            }
+        }
+
+
+        return $model;
     }
 
     /**
@@ -128,7 +246,7 @@ class TicketController extends ActiveController
             throw new NotFoundHttpException("Ticket dose not exist.");
         }
 
-        $department = $departmentModelName::findOne(\Yii::$app->getRequest()->post('departmentId'));
+        $department = $departmentModelName::findOne(\Yii::$app->getRequest()->post('department_id'));
         if(!$department){
             throw new NotFoundHttpException("Department dose not exist.");
         }

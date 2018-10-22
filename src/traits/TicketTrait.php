@@ -52,7 +52,7 @@ trait TicketTrait
      * @param CustomerInterface $customer
      * @param Department $department
      *
-     * @return Ticket
+     * @return TicketInterface
      *
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      */
@@ -69,7 +69,7 @@ trait TicketTrait
         }
         $ticket->department_id = $department->id;
         $ticket->subject = $subject;
-        $ticket->tracking_code = $ticket->generatetracking_code();
+        $ticket->tracking_code = $ticket->generatetrackingCode();
         $ticket->status = self::STATUS_NOT_REPLIED;
         return $ticket;
     }
@@ -152,6 +152,7 @@ trait TicketTrait
             'email',
             'subject',
             'department_id',
+            'tracking_code',
             'status',
             'update_at',
             'create_at',
@@ -341,7 +342,7 @@ trait TicketTrait
      *
      * @throws \RuntimeException    When cant create ticket.
      *
-     * @return TicketMessage
+     * @return MessageInterface
      *
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      */
@@ -412,9 +413,22 @@ trait TicketTrait
     {
         $fields = parent::fields();
 
-        unset($fields['customer_id'], $fields['department_id'], $fields['name'], $fields['family'], $fields['mobile'], $fields['email']);
 
-        return array_merge($fields, ['statusLabel', 'isGuestTicket', 'customer', 'department']);
+        $fields = array_diff($fields, [
+            'customer_id',
+            'department_id',
+            'name',
+            'family',
+            'mobile',
+            'email',
+        ]);
+
+        return array_merge($fields, [
+            'status_label' => 'statusLabel',
+            'is_guest_ticket' => 'isGuestTicket',
+            'customer',
+            'department'
+        ]);
     }
 
     /**
@@ -442,7 +456,7 @@ trait TicketTrait
      *
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      */
-    protected function generatetracking_code()
+    protected function generatetrackingode()
     {
         $date = gmdate('yndhis', time());
         $finalCode = $this->generateRandomString(4) . $date . $this->generateRandomString(4);
