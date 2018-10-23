@@ -69,7 +69,7 @@ trait TicketTrait
         }
         $ticket->department_id = $department->id;
         $ticket->subject = $subject;
-        $ticket->tracking_code = $ticket->generatetrackingCode();
+        $ticket->tracking_code = $ticket->generateTrackingode();
         $ticket->status = self::STATUS_NOT_REPLIED;
         return $ticket;
     }
@@ -456,7 +456,7 @@ trait TicketTrait
      *
      * @author Mohammad Parvaneh <mohammad.pvn1375@gmail.com>
      */
-    protected function generatetrackingode()
+    protected function generateTrackingode()
     {
         $date = gmdate('yndhis', time());
         $finalCode = $this->generateRandomString(4) . $date . $this->generateRandomString(4);

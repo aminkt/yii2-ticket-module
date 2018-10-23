@@ -7,8 +7,10 @@ use aminkt\ticket\interfaces\DepartmentInterface;
 use aminkt\ticket\interfaces\TicketInterface;
 use aminkt\ticket\Ticket;
 use aminkt\ticket\traits\TicketTrait;
+use yii\data\ActiveDataProvider;
 use yii\helpers\ArrayHelper;
 use yii\rest\ActiveController;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 
 /**
@@ -39,7 +41,6 @@ class TicketController extends ActiveController
         unset($actions['create'], $actions['update']);
         return $actions;
     }
-
 
     /**
      * Create a new ticket.

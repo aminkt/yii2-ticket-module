@@ -14,6 +14,9 @@ namespace aminkt\ticket\interfaces;
  */
 interface BaseTicketUserInterface
 {
+    const TYPE_CUSTOMER_CARE = 'customer_care';
+    const TYPE_CUSTOMER = 'customer';
+
     /**
      * Return User Id.
      * 
