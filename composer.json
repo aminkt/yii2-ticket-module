@@ -4,7 +4,7 @@
   "keywords": ["yii", "ticket", "customer care", "ticketing"],
   "type": "yii2-extension",
   "support": {
-    "source": "https://gitlab.com/telco/yii2-ticket-module"
+    "source": "https://github.com/telco/yii2-ticket-module"
   },
   "authors": [
     {
